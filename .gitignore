@@ -353,3 +353,11 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+.idea/.gitignore
+.idea/checkstyle-idea.xml
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/moodle-scraper.iml
+.idea/sonarlint/
+.idea/vcs.xml

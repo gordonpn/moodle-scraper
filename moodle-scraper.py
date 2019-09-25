@@ -17,8 +17,8 @@ def get_session():
     login_url = moodle_url + "login/index.php"
     result = session_requests.get(login_url)
 
-    tree = html.fromstring(result.text)
-    authenticity_token = list(set(tree.xpath("//input[@name='logintoken']/@value")))[0]
+    soup = BeautifulSoup(result.text, 'html.parser')
+    authenticity_token = soup.find("input", {"name": "logintoken"})['value']
 
     auth_data = {
         'logintoken': authenticity_token,
@@ -39,7 +39,6 @@ def get_session():
     )
 
     soup = BeautifulSoup(result.text, 'html.parser')
-    print(soup.title.string)
     return session_requests
 
 
@@ -65,4 +64,4 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     username, password = get_config()
-    get_session()
+    session = get_session()
