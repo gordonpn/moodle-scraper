@@ -361,3 +361,4 @@ Temporary Items
 .idea/moodle-scraper.iml
 .idea/sonarlint/
 .idea/vcs.xml
+.idea/pylint.xml
