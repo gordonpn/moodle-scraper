@@ -12,6 +12,7 @@ moodle_url = "https://moodle.concordia.ca/moodle/"
 
 
 def get_session():
+    # rewrite with beautifulsoup alternatives
     session_requests = requests.session()
     login_url = moodle_url + "login/index.php"
     result = session_requests.get(login_url)
@@ -42,10 +43,26 @@ def get_session():
     return session_requests
 
 
+def get_config():
+    # if none set, exit
+    user = ""
+    passwd = ""
+    if "MOODLE_USERNAME" in os.environ:
+        user = os.environ["MOODLE_USERNAME"]
+    else:
+        user = ""
+        # get from config file
+    if "MOODLE_PASSWORD" in os.environ:
+        passwd = os.environ["MOODLE_PASSWORD"]
+    else:
+        passwd = ""
+
+    return user, passwd
+
+
 if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
-    username = os.environ["MOODLE_USERNAME"]
-    password = os.environ["MOODLE_PASSWORD"]
+    username, password = get_config()
     get_session()
