@@ -83,7 +83,7 @@ def get_courses():
 def get_files():
     files_per_course = {}
     files_list = []
-    for course, link in courses:
+    for course, link in courses.items():
         course_page = session.get(link, headers=dict(referer=link))
         soup = BeautifulSoup(course_page.text, 'html.parser')
         print(soup.find_all("div", {"class": "activityinstance"}))
