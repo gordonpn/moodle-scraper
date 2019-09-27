@@ -2,26 +2,38 @@ from requests import session
 from bs4 import BeautifulSoup
 import os, sys, itertools, re
 import urllib
-import configparser
+from configparser import ConfigParser, NoSectionError
 import datetime
 import logging
 import requests
 
 
 def get_config():
+    config_parser = ConfigParser()
+    config_parser.read('moodle-scraper.conf')
     user = ""
     passwd = ""
     if "MOODLE_USERNAME" in os.environ:
         logger.info("Username found in environment variables")
         user = os.environ["MOODLE_USERNAME"]
     else:
-        user = ""
+        try:
+            user = config_parser.get('moodle-scraper', 'username')
+        except Exception as e:
+            logger.error("Error with config file format | " + str(e))
+        if user != "":
+            logger.info("Username found in config file")
 
     if "MOODLE_PASSWORD" in os.environ:
         logger.info("Password found in environment variables")
         passwd = os.environ["MOODLE_PASSWORD"]
     else:
-        passwd = ""
+        try:
+            passwd = config_parser.get('moodle-scraper', 'password')
+        except Exception as e:
+            logger.error("Error with config file format | " + str(e))
+        if passwd != "":
+            logger.info("Password found in config file")
 
     if user == "" or passwd == "":
         logger.error("Did not find any authentication data, exiting...")
@@ -113,6 +125,32 @@ def get_files():
     return files_per_course, text_per_course
 
 
+def create_saving_directory():
+    path = os.getcwd() + "/courses"
+    if not os.path.exists(path):
+        try:
+            os.mkdir(path)
+        except OSError:
+            logger.error("Creation of the directory {} failed".format(path))
+        else:
+            logger.info("Successfully created the directory {} ".format(path))
+    else:
+        logger.info("{} exists and will be used to save files".format(path))
+
+    return path
+
+
+def save_text():
+    # open file into object, loop through courses, concatenate all the text, overwrite that object, write object
+    pass
+
+
+def save_files():
+    # how to overwrite files?
+    # loop through courses, go through each link and download the file and save
+    pass
+
+
 if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
@@ -122,3 +160,6 @@ if __name__ == '__main__':
     session = get_session()
     courses = get_courses()
     files, paragraphs = get_files()
+    save_path = create_saving_directory()
+    save_text()
+    save_files()
