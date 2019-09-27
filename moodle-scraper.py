@@ -9,20 +9,23 @@ import requests
 
 
 def get_config():
-    # if none set, exit
     user = ""
     passwd = ""
     if "MOODLE_USERNAME" in os.environ:
-        logger.info("Username found in env variables")
+        logger.info("Username found in environment variables")
         user = os.environ["MOODLE_USERNAME"]
     else:
         user = ""
-        # get from config file
+
     if "MOODLE_PASSWORD" in os.environ:
-        logger.info("Password found in env variables")
+        logger.info("Password found in environment variables")
         passwd = os.environ["MOODLE_PASSWORD"]
     else:
         passwd = ""
+
+    if user == "" or passwd == "":
+        logger.error("Did not find any authentication data, exiting...")
+        sys.exit(-1)
 
     return user, passwd
 
@@ -48,12 +51,11 @@ def get_session():
     result = session_requests.get(url, headers=dict(referer=url))
     soup = BeautifulSoup(result.text, 'html.parser')
 
-    if (soup.title.string == "Dashboard"):
+    if soup.title.string == "Dashboard":
         logger.info("Authentication successful")
     else:
-        logger.info("Authentication unsuccessful")
-        logger.info("Exiting...")
-        exit(-1)
+        logger.info("Authentication unsuccessful, exiting...")
+        sys.exit(-1)
 
     return session_requests
 
@@ -64,16 +66,17 @@ def get_courses():
     result = session.get(url, headers=dict(referer=url))
     soup = BeautifulSoup(result.text, 'html.parser')
     for header in soup.find_all("h4", {"class": "media-heading"}):
-        courses_dict[header.find("a").string] = header.find("a").get('href')
+        course_name = header.find("a").string
+        course_moodle = header.find("a").get('href')
+        courses_dict[course_name] = course_moodle
 
     for course in courses_dict.copy():
         if "Work Term" in course:
             courses_dict.pop(course)
 
-    if (bool(courses_dict) == False):
-        logger.error("Could not find any courses")
-        logger.info("Exiting...")
-        exit(-1)
+    if not bool(courses_dict):
+        logger.error("Could not find any courses, exiting...")
+        sys.exit(-1)
     else:
         logger.info("Found {} courses successfully".format(len(courses_dict)))
 
@@ -82,13 +85,32 @@ def get_courses():
 
 def get_files():
     files_per_course = {}
-    files_list = []
+    text_per_course = {}
+    logger.info("Going through each course Moodle page")
     for course, link in courses.items():
+        files_list = []
+        text_list = []
+        logger.info("Course name: {}, link: {}".format(course, link))
         course_page = session.get(link, headers=dict(referer=link))
         soup = BeautifulSoup(course_page.text, 'html.parser')
-        print(soup.find_all("div", {"class": "activityinstance"}))
+        for text in soup.find_all("div", {"class": "no-overflow"}):
+            for text_block in text.find_all("p"):
+                text_list.append(text_block.getText())
+        for activity in soup.find_all("div", {"class": "activityinstance"}):
+            file_type = activity.find("img")["src"]
+            if "icon" not in file_type:
+                file_name = activity.find("span", {"class": "instancename"}).text
+                logger.info("Found file: {}".format(file_name))
+                file_link = activity.find("a").get('href')
+                logger.info("With file link: {}".format(file_link))
+                files_list.append(file_link)
+        if len(text_list) > 0:
+            text_list = [text.replace(u'\xa0', u' ') for text in text_list]
+            text_list = list(dict.fromkeys(text_list))
+            text_per_course[course] = text_list
+        files_per_course[course] = files_list
 
-    return files_list
+    return files_per_course, text_per_course
 
 
 if __name__ == '__main__':
@@ -99,4 +121,4 @@ if __name__ == '__main__':
     username, password = get_config()
     session = get_session()
     courses = get_courses()
-    files = get_files()
+    files, paragraphs = get_files()
