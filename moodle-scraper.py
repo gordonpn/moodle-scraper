@@ -45,7 +45,11 @@ def get_config():
 def get_session():
     session_requests = requests.session()
     login_url = moodle_url + "login/index.php"
-    result = session_requests.get(login_url)
+    try:
+        result = session_requests.get(login_url)
+    except ConnectionError  as e:
+        logger.error("Could not connect to Moodle, maybe it's down? " + str(e))
+        sys.exit()
 
     soup = BeautifulSoup(result.text, 'html.parser')
     authenticity_token = soup.find("input", {"name": "logintoken"})['value']
@@ -88,7 +92,7 @@ def get_courses():
 
     if not bool(courses_dict):
         logger.error("Could not find any courses, exiting...")
-        sys.exit(-1)
+        sys.exit()
     else:
         logger.info("Found {} courses successfully".format(len(courses_dict)))
 
