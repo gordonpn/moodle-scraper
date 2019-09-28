@@ -138,7 +138,6 @@ def get_files():
             text_per_course[course] = text_list
         files_per_course[course] = files_dict
 
-    print(files_per_course)
     return files_per_course, text_per_course
 
 
@@ -181,12 +180,12 @@ def save_text():
 
 
 def save_files():
-    # how to overwrite files?
-    # loop through courses, go through each link and download the file and save
     for course, links in files.items():
         current_path = save_path + "/" + course
-        for link in links:
-            pass
+        for name, link in links.items():
+            request = session.get(link, headers=dict(referer=link))
+            with open(current_path + '/' + name, 'wb') as write_file:
+                write_file.write(request.content)
 
 
 if __name__ == '__main__':
