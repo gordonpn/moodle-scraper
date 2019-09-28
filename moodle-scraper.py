@@ -6,6 +6,12 @@ from configparser import ConfigParser, NoSectionError
 import datetime
 import logging
 import requests
+from urllib.request import urlopen
+from urllib.request import urlretrieve
+import cgi
+from os.path import basename
+import os
+from urllib.parse import urlsplit
 
 
 def get_config():
@@ -47,7 +53,7 @@ def get_session():
     login_url = moodle_url + "login/index.php"
     try:
         result = session_requests.get(login_url)
-    except ConnectionError  as e:
+    except ConnectionError as e:
         logger.error("Could not connect to Moodle, maybe it's down? " + str(e))
         sys.exit()
 
@@ -82,7 +88,7 @@ def get_courses():
     result = session.get(url, headers=dict(referer=url))
     soup = BeautifulSoup(result.text, 'html.parser')
     for header in soup.find_all("h4", {"class": "media-heading"}):
-        course_name = header.find("a").string
+        course_name = header.find("a").string.strip()
         course_moodle = header.find("a").get('href')
         courses_dict[course_name] = course_moodle
 
@@ -116,7 +122,7 @@ def get_files():
             file_type = activity.find("img")["src"]
             if "icon" not in file_type:
                 file_name = activity.find("span", {"class": "instancename"}).text
-                logger.info("Found file: {}".format(file_name))
+                logger.info("Found: {}".format(file_name))
                 file_link = activity.find("a").get('href')
                 logger.info("With file link: {}".format(file_link))
                 files_list.append(file_link)
@@ -141,18 +147,39 @@ def create_saving_directory():
     else:
         logger.info("{} exists and will be used to save files".format(path))
 
+    for course in files.keys():
+        course_path = path + "/" + course
+        if not os.path.exists(course_path):
+            try:
+                os.mkdir(course_path)
+            except OSError:
+                logger.error("Creation of the directory {} failed".format(course_path))
+            else:
+                logger.info("Successfully created the directory {} ".format(course_path))
+        else:
+            logger.info("{} exists and will be used to save files".format(course_path))
+
     return path
 
 
 def save_text():
-    # open file into object, loop through courses, concatenate all the text, overwrite that object, write object
-    pass
+    for course, paragraph in paragraphs.items():
+        current_path = save_path + "/" + course + "/course-information.txt"
+        if os.path.exists(current_path):
+            os.remove(current_path)
+        with open(current_path, "w+") as write_file:
+            paragraph = [text + "\r\n" for text in paragraph]
+            write_file.writelines(paragraph)
+        logger.info("Wrote info for {} successfully".format(course))
 
 
 def save_files():
     # how to overwrite files?
     # loop through courses, go through each link and download the file and save
-    pass
+    for course, links in files.items():
+        current_path = save_path + "/" + course
+        for link in links:
+            pass
 
 
 if __name__ == '__main__':
