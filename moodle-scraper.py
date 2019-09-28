@@ -110,7 +110,7 @@ def get_files():
     text_per_course = {}
     logger.info("Going through each course Moodle page")
     for course, link in courses.items():
-        files_list = []
+        files_dict = {}
         text_list = []
         logger.info("Course name: {}, link: {}".format(course, link))
         course_page = session.get(link, headers=dict(referer=link))
@@ -121,17 +121,24 @@ def get_files():
         for activity in soup.find_all("div", {"class": "activityinstance"}):
             file_type = activity.find("img")["src"]
             if "icon" not in file_type:
+                extension = ""
+                if "pdf" in file_type:
+                    extension = ".pdf"
+                elif "powerpoint" in file_type:
+                    extension = ".ppt"
                 file_name = activity.find("span", {"class": "instancename"}).text
-                logger.info("Found: {}".format(file_name))
+                file_name = file_name.replace(' File', '').strip() + extension
+                logger.info("Found file: {}".format(file_name))
                 file_link = activity.find("a").get('href')
                 logger.info("With file link: {}".format(file_link))
-                files_list.append(file_link)
+                files_dict[file_name] = file_link
         if len(text_list) > 0:
             text_list = [text.replace(u'\xa0', u' ') for text in text_list]
             text_list = list(dict.fromkeys(text_list))
             text_per_course[course] = text_list
-        files_per_course[course] = files_list
+        files_per_course[course] = files_dict
 
+    print(files_per_course)
     return files_per_course, text_per_course
 
 
