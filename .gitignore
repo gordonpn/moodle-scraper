@@ -362,3 +362,4 @@ Temporary Items
 .idea/sonarlint/
 .idea/vcs.xml
 .idea/pylint.xml
+/courses/

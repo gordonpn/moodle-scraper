@@ -13,6 +13,7 @@ def get_config():
     config_parser.read('moodle-scraper.conf')
     user = ""
     passwd = ""
+    custom_path = ""
     if "MOODLE_USERNAME" in os.environ:
         logger.info("Username found in environment variables")
         user = os.environ["MOODLE_USERNAME"]
@@ -39,7 +40,17 @@ def get_config():
         logger.error("Did not find any authentication data, exiting...")
         sys.exit(-1)
 
-    return user, passwd
+    try:
+        custom_path = config_parser.get('moodle-scraper', 'folder')
+    except Exception as e:
+        logger.error("Error with config file format | " + str(e))
+    if custom_path != "":
+        logger.info("Folder defined found in config file")
+    else:
+        custom_path = os.getcwd()
+        logger.info("Using default folder ")
+
+    return user, passwd, custom_path
 
 
 def get_session():
@@ -136,7 +147,8 @@ def get_files():
 
 
 def create_saving_directory():
-    path = os.getcwd() + "/courses"
+    path = user_path + "/courses"
+
     if not os.path.exists(path):
         try:
             os.mkdir(path)
@@ -178,8 +190,11 @@ def save_files():
         current_path = save_path + "/" + course
         for name, link in links.items():
             request = session.get(link, headers=dict(referer=link))
-            with open(current_path + '/' + name, 'wb') as write_file:
-                write_file.write(request.content)
+            try:
+                with open(current_path + '/' + name, 'wb') as write_file:
+                    write_file.write(request.content)
+            except PermissionError as e:
+                logger.error("File with same name is open | " + str(e))
 
 
 if __name__ == '__main__':
@@ -187,7 +202,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     moodle_url = "https://moodle.concordia.ca/moodle/"
-    username, password = get_config()
+    username, password, user_path = get_config()
     session = get_session()
     courses = get_courses()
     files, paragraphs = get_files()
