@@ -1,17 +1,11 @@
-from requests import session
-from bs4 import BeautifulSoup
-import os, sys, itertools, re
-import urllib
-from configparser import ConfigParser, NoSectionError
-import datetime
 import logging
-import requests
-from urllib.request import urlopen
-from urllib.request import urlretrieve
-import cgi
-from os.path import basename
 import os
-from urllib.parse import urlsplit
+import sys
+from configparser import ConfigParser
+
+import requests
+from bs4 import BeautifulSoup
+from requests import session
 
 
 def get_config():
