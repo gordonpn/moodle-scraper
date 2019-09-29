@@ -45,7 +45,7 @@ def get_config():
     except Exception as e:
         logger.error("Error with config file format | " + str(e))
     if custom_path != "":
-        logger.info("Folder defined found in config file")
+        logger.info("User defined folder found in config file")
     else:
         custom_path = os.getcwd()
         logger.info("Using default folder ")
