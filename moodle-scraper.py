@@ -62,8 +62,8 @@ def get_session():
     login_url = moodle_url + "login/index.php"
     try:
         result = session_requests.get(login_url)
-    except ConnectionError as e:
-        logger.error("Could not connect to Moodle, maybe it's down? " + str(e))
+    except Exception as e:
+        logger.error("Could not connect to Moodle, it could be down " + str(e))
         sys.exit()
 
     soup = BeautifulSoup(result.text, 'html.parser')
