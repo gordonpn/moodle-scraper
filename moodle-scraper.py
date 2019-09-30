@@ -11,46 +11,50 @@ from requests import session
 def get_config():
     config_parser = ConfigParser()
     config_parser.read('moodle-scraper.conf')
-    user = ""
-    passwd = ""
-    custom_path = ""
-    if "MOODLE_USERNAME" in os.environ:
-        logger.info("Username found in environment variables")
-        user = os.environ["MOODLE_USERNAME"]
-    else:
-        try:
-            user = config_parser.get('moodle-scraper', 'username')
-        except Exception as e:
-            logger.error("Error with config file format | " + str(e))
-        if user != "":
-            logger.info("Username found in config file")
-
-    if "MOODLE_PASSWORD" in os.environ:
-        logger.info("Password found in environment variables")
-        passwd = os.environ["MOODLE_PASSWORD"]
-    else:
-        try:
-            passwd = config_parser.get('moodle-scraper', 'password')
-        except Exception as e:
-            logger.error("Error with config file format | " + str(e))
-        if passwd != "":
-            logger.info("Password found in config file")
-
-    if user == "" or passwd == "":
-        logger.error("Did not find any authentication data, exiting...")
-        sys.exit(-1)
+    user = passwd = custom_path = ""
+    exclusions = []
 
     try:
-        custom_path = config_parser.get('moodle-scraper', 'folder')
+        if "MOODLE_USERNAME" in os.environ:
+            logger.info("Username found in environment variables")
+            user = os.environ["MOODLE_USERNAME"]
+        else:
+            if config_parser.has_option('moodle-scraper', 'username'):
+                user = config_parser.get('moodle-scraper', 'username')
+            else:
+                logger.info("Username found in config file")
+                sys.exit(-1)
+
+        if "MOODLE_PASSWORD" in os.environ:
+            logger.info("Password found in environment variables")
+            passwd = os.environ["MOODLE_PASSWORD"]
+        else:
+            if config_parser.has_option('moodle-scraper', 'password'):
+                passwd = config_parser.get('moodle-scraper', 'password')
+            else:
+                logger.info("Password found in config file")
+                sys.exit(-1)
+
+        if config_parser.has_option('moodle-scraper', 'folder'):
+            custom_path = config_parser.get('moodle-scraper', 'folder')
+            logger.info("User defined folder found in config file")
+        else:
+            custom_path = os.getcwd()
+            logger.info("Using default folder ")
+
+        if config_parser.has_option('moodle-scraper', 'exclusions'):
+            exclusions_text = config_parser.get('moodle-scraper', 'exclusions')
+            exclusions = exclusions_text.lower().split(',')
+            exclusions = [text.strip() for text in exclusions]
+            logger.info("User defined course exclusions found in config file:")
+            for text in exclusions:
+                logger.info("{}".format(text))
+        else:
+            logger.info("No user defined course exclusions found in config file")
     except Exception as e:
         logger.error("Error with config file format | " + str(e))
-    if custom_path != "":
-        logger.info("User defined folder found in config file")
-    else:
-        custom_path = os.getcwd()
-        logger.info("Using default folder ")
 
-    return user, passwd, custom_path
+    return user, passwd, custom_path, exclusions
 
 
 def get_session():
@@ -98,14 +102,17 @@ def get_courses():
         courses_dict[course_name] = course_moodle
 
     for course in courses_dict.copy():
-        if "Work Term" in course:
-            courses_dict.pop(course)
+        for exclusion in excluded_courses:
+            if exclusion in course.lower():
+                courses_dict.pop(course)
 
     if not bool(courses_dict):
         logger.error("Could not find any courses, exiting...")
         sys.exit()
     else:
-        logger.info("Found {} courses successfully".format(len(courses_dict)))
+        logger.info("Found {} courses successfully:".format(len(courses_dict)))
+        for course in courses_dict.keys():
+            logger.info(course)
 
     return courses_dict
 
@@ -202,7 +209,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     moodle_url = "https://moodle.concordia.ca/moodle/"
-    username, password, user_path = get_config()
+    username, password, user_path, excluded_courses = get_config()
     session = get_session()
     courses = get_courses()
     files, paragraphs = get_files()
