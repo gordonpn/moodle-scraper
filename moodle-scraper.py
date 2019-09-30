@@ -21,9 +21,11 @@ def get_config():
         else:
             if config_parser.has_option('moodle-scraper', 'username'):
                 user = config_parser.get('moodle-scraper', 'username')
+            if user == '':
+                logger.error("Username not found in config file")
+                sys.exit(-1)
             else:
                 logger.info("Username found in config file")
-                sys.exit(-1)
 
         if "MOODLE_PASSWORD" in os.environ:
             logger.info("Password found in environment variables")
@@ -31,26 +33,31 @@ def get_config():
         else:
             if config_parser.has_option('moodle-scraper', 'password'):
                 passwd = config_parser.get('moodle-scraper', 'password')
+            if passwd == '':
+                logger.error("Password not found in config file")
+                sys.exit(-1)
             else:
                 logger.info("Password found in config file")
-                sys.exit(-1)
 
         if config_parser.has_option('moodle-scraper', 'folder'):
             custom_path = config_parser.get('moodle-scraper', 'folder')
-            logger.info("User defined folder found in config file")
-        else:
+        if custom_path == '':
             custom_path = os.getcwd()
             logger.info("Using default folder ")
+        else:
+            logger.info("User defined folder found in config file")
 
         if config_parser.has_option('moodle-scraper', 'exclusions'):
             exclusions_text = config_parser.get('moodle-scraper', 'exclusions')
             exclusions = exclusions_text.lower().split(',')
             exclusions = [text.strip() for text in exclusions]
+        if exclusions_text == '':
+            logger.info("No user defined course exclusions found in config file")
+        else:
             logger.info("User defined course exclusions found in config file:")
             for text in exclusions:
                 logger.info("{}".format(text))
-        else:
-            logger.info("No user defined course exclusions found in config file")
+
     except Exception as e:
         logger.error("Error with config file format | " + str(e))
 
@@ -63,7 +70,7 @@ def get_session():
     try:
         result = session_requests.get(login_url)
     except Exception as e:
-        logger.error("Could not connect to Moodle, it could be down " + str(e))
+        logger.error("Could not connect to Moodle, it could be down | " + str(e))
         sys.exit()
 
     soup = BeautifulSoup(result.text, 'html.parser')
