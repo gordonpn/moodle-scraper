@@ -203,11 +203,11 @@ def save_files():
     for course, links in files.items():
         current_path = save_path + "/" + course
         for name, link in links.items():
-            request = session.get(link, headers=dict(referer=link))
             try:
+                request = session.get(link, headers=dict(referer=link))
                 with open(current_path + '/' + name, 'wb') as write_file:
                     write_file.write(request.content)
-            except PermissionError as e:
+            except Exception as e:
                 logger.error("File with same name is open | " + str(e))
 
 
