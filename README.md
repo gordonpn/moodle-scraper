@@ -34,6 +34,7 @@ You can contact me if there are any questions or problems, or open an issue.
 ## Roadmap and todo
 
 *  [ ] Support other possible file types
+*  [ ] Improve running time by using async or threads
 
 ## Contributing
 
