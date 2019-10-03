@@ -51,12 +51,12 @@ def get_config():
             exclusions_text = config_parser.get('moodle-scraper', 'exclusions')
             exclusions = exclusions_text.lower().split(',')
             exclusions = [text.strip() for text in exclusions]
-        if exclusions_text == '':
-            logger.info("No user defined course exclusions found in config file")
-        else:
-            logger.info("User defined course exclusions found in config file:")
-            for text in exclusions:
-                logger.info("{}".format(text))
+            if exclusions_text == '':
+                logger.info("No user defined course exclusions found in config file")
+            else:
+                logger.info("User defined course exclusions found in config file:")
+                for text in exclusions:
+                    logger.info("{}".format(text))
 
     except Exception as e:
         logger.error("Error with config file format | " + str(e))
