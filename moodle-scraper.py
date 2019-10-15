@@ -1,11 +1,13 @@
 import logging
 import os
 import sys
+import threading
 from configparser import ConfigParser
 
 import requests
 from bs4 import BeautifulSoup
 from requests import session
+from requests.adapters import HTTPAdapter
 
 
 def get_config():
@@ -49,11 +51,11 @@ def get_config():
 
         if config_parser.has_option('moodle-scraper', 'exclusions'):
             exclusions_text = config_parser.get('moodle-scraper', 'exclusions')
-            exclusions = exclusions_text.lower().split(',')
-            exclusions = [text.strip() for text in exclusions]
             if exclusions_text == '':
                 logger.info("No user defined course exclusions found in config file")
             else:
+                exclusions = exclusions_text.lower().split(',')
+                exclusions = [text.strip() for text in exclusions]
                 logger.info("User defined course exclusions found in config file:")
                 for text in exclusions:
                     logger.info("{}".format(text))
@@ -66,6 +68,7 @@ def get_config():
 
 def get_session():
     session_requests = requests.session()
+    session_requests.mount('https://', HTTPAdapter(pool_connections=70, pool_maxsize=70))
     login_url = moodle_url + "login/index.php"
     try:
         result = session_requests.get(login_url)
@@ -78,8 +81,8 @@ def get_session():
 
     auth_data = {
         'logintoken': authenticity_token,
-        'username': username,
-        'password': password
+        'username'  : username,
+        'password'  : password
     }
 
     logger.info("Attempting to authenticate...")
@@ -108,10 +111,11 @@ def get_courses():
         course_moodle = header.find("a").get('href')
         courses_dict[course_name] = course_moodle
 
-    for course in courses_dict.copy():
-        for exclusion in excluded_courses:
-            if exclusion in course.lower():
-                courses_dict.pop(course)
+    if excluded_courses:
+        for course in courses_dict.copy():
+            for exclusion in excluded_courses:
+                if exclusion in course.lower():
+                    courses_dict.pop(course)
 
     if not bool(courses_dict):
         logger.error("Could not find any courses, exiting...")
@@ -203,12 +207,23 @@ def save_files():
     for course, links in files.items():
         current_path = save_path + "/" + course
         for name, link in links.items():
-            try:
-                request = session.get(link, headers=dict(referer=link))
-                with open(current_path + '/' + name, 'wb') as write_file:
-                    write_file.write(request.content)
-            except Exception as e:
-                logger.error("File with same name is open | " + str(e))
+            threading.Thread(target=_parallel_save_files,
+                             kwargs={'current_path': current_path, 'name': name, 'link': link}).start()
+
+
+def _parallel_save_files(current_path=None, name=None, link=None):
+    params_are_valid = current_path and name and link
+
+    if params_are_valid:
+        logger.info("Attempting parallel download of {}".format(name))
+        try:
+            request = session.get(link, headers=dict(referer=link))
+            with open(current_path + '/' + name, 'wb') as write_file:
+                write_file.write(request.content)
+        except Exception as e:
+            logger.error("File with same name is open | " + str(e))
+    else:
+        logger.error("Some parameters were missing for parallel downloads")
 
 
 if __name__ == '__main__':
