@@ -3,6 +3,7 @@ import os
 import sys
 import threading
 from configparser import ConfigParser
+from typing import Dict, List, Tuple
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,66 +11,83 @@ from requests import session
 from requests.adapters import HTTPAdapter
 
 
-def get_config():
-    config_parser = ConfigParser()
+def get_config() -> Tuple[str, str, str, List[str]]:
+    config_parser: ConfigParser = ConfigParser()
     config_parser.read('moodle-scraper.conf')
-    user = passwd = custom_path = ""
-    exclusions = []
 
     try:
-        if "MOODLE_USERNAME" in os.environ:
-            logger.info("Username found in environment variables")
-            user = os.environ["MOODLE_USERNAME"]
-        else:
-            if config_parser.has_option('moodle-scraper', 'username'):
-                user = config_parser.get('moodle-scraper', 'username')
-            if user == '':
-                logger.error("Username not found in config file")
-                sys.exit(-1)
-            else:
-                logger.info("Username found in config file")
-
-        if "MOODLE_PASSWORD" in os.environ:
-            logger.info("Password found in environment variables")
-            passwd = os.environ["MOODLE_PASSWORD"]
-        else:
-            if config_parser.has_option('moodle-scraper', 'password'):
-                passwd = config_parser.get('moodle-scraper', 'password')
-            if passwd == '':
-                logger.error("Password not found in config file")
-                sys.exit(-1)
-            else:
-                logger.info("Password found in config file")
-
-        if config_parser.has_option('moodle-scraper', 'folder'):
-            custom_path = config_parser.get('moodle-scraper', 'folder')
-        if custom_path == '':
-            custom_path = os.getcwd()
-            logger.info("Using default folder ")
-        else:
-            logger.info("User defined folder found in config file")
-
-        if config_parser.has_option('moodle-scraper', 'exclusions'):
-            exclusions_text = config_parser.get('moodle-scraper', 'exclusions')
-            if exclusions_text == '':
-                logger.info("No user defined course exclusions found in config file")
-            else:
-                exclusions = exclusions_text.lower().split(',')
-                exclusions = [text.strip() for text in exclusions]
-                logger.info("User defined course exclusions found in config file:")
-                for text in exclusions:
-                    logger.info("{}".format(text))
+        user: str = _get_username(config_parser)
+        passwd: str = _get_password(config_parser)
+        custom_path: str = _get_save_folder(config_parser)
+        exclusions: List[str] = _get_exclusions(config_parser)
 
     except Exception as e:
         logger.error("Error with config file format | " + str(e))
+        sys.exit(-1)
 
     return user, passwd, custom_path, exclusions
 
 
-def get_session():
+def _get_exclusions(config_parser: ConfigParser) -> List[str]:
+    exclusions: List[str] = []
+    if config_parser.has_option('moodle-scraper', 'exclusions'):
+        exclusions_text = config_parser.get('moodle-scraper', 'exclusions')
+        if not exclusions_text:
+            logger.info("No user defined course exclusions found in config file")
+        else:
+            exclusions = exclusions_text.lower().split(',')
+            exclusions = [text.strip() for text in exclusions]
+            logger.info("User defined course exclusions found in config file:")
+            for text in exclusions:
+                logger.info("{}".format(text))
+    return exclusions
+
+
+def _get_save_folder(config_parser: ConfigParser) -> str:
+    if config_parser.has_option('moodle-scraper', 'folder'):
+        custom_path: str = config_parser.get('moodle-scraper', 'folder')
+    if not custom_path:
+        custom_path = os.getcwd()
+        logger.info("Using default folder ")
+    else:
+        logger.info("User defined folder found in config file")
+    return custom_path
+
+
+def _get_password(config_parser: ConfigParser) -> str:
+    if "MOODLE_PASSWORD" in os.environ:
+        logger.info("Password found in environment variables")
+        passwd: str = os.environ["MOODLE_PASSWORD"]
+    else:
+        if config_parser.has_option('moodle-scraper', 'password'):
+            passwd = config_parser.get('moodle-scraper', 'password')
+        if not passwd:
+            logger.error("Password not found in config file")
+            sys.exit(-1)
+        else:
+            logger.info("Password found in config file")
+    return passwd
+
+
+def _get_username(config_parser: ConfigParser) -> str:
+    if "MOODLE_USERNAME" in os.environ:
+        logger.info("Username found in environment variables")
+        user: str = os.environ["MOODLE_USERNAME"]
+    else:
+        if config_parser.has_option('moodle-scraper', 'username'):
+            user = config_parser.get('moodle-scraper', 'username')
+        if not user:
+            logger.error("Username not found in config file")
+            sys.exit(-1)
+        else:
+            logger.info("Username found in config file")
+    return user
+
+
+def get_session() -> session():
     session_requests = requests.session()
-    session_requests.mount('https://', HTTPAdapter(pool_connections=70, pool_maxsize=70))
-    login_url = moodle_url + "login/index.php"
+    session_requests.mount('https://', HTTPAdapter(pool_connections=80, pool_maxsize=80))
+    login_url: str = moodle_url + "login/index.php"
     try:
         result = session_requests.get(login_url)
     except Exception as e:
@@ -79,7 +97,7 @@ def get_session():
     soup = BeautifulSoup(result.text, 'html.parser')
     authenticity_token = soup.find("input", {"name": "logintoken"})['value']
 
-    auth_data = {
+    auth_data: Dict[str, str] = {
         'logintoken': authenticity_token,
         'username'  : username,
         'password'  : password
@@ -88,7 +106,7 @@ def get_session():
     logger.info("Attempting to authenticate...")
     result = session_requests.post(login_url, data=auth_data, headers=dict(referer=login_url))
 
-    url = moodle_url + "my/"
+    url: str = moodle_url + "my/"
     result = session_requests.get(url, headers=dict(referer=url))
     soup = BeautifulSoup(result.text, 'html.parser')
 
@@ -101,14 +119,14 @@ def get_session():
     return session_requests
 
 
-def get_courses():
-    courses_dict = {}
-    url = moodle_url + "my/"
+def get_courses() -> Dict[str, str]:
+    courses_dict: Dict[str, str] = {}
+    url: str = moodle_url + "my/"
     result = session.get(url, headers=dict(referer=url))
     soup = BeautifulSoup(result.text, 'html.parser')
     for header in soup.find_all("h4", {"class": "media-heading"}):
-        course_name = header.find("a").string.strip()
-        course_moodle = header.find("a").get('href')
+        course_name: str = header.find("a").string.strip()
+        course_moodle: str = header.find("a").get('href')
         courses_dict[course_name] = course_moodle
 
     if excluded_courses:
@@ -128,44 +146,54 @@ def get_courses():
     return courses_dict
 
 
-def get_files():
-    files_per_course = {}
-    text_per_course = {}
+def get_files() -> Tuple[Dict[str, Dict[str, str]], Dict[str, List[str]]]:
+    files_per_course: Dict[str, Dict[str, str]] = {}
+    text_per_course: Dict[str, List[str]] = {}
     logger.info("Going through each course Moodle page")
     for course, link in courses.items():
-        files_dict = {}
-        text_list = []
         logger.info("Course name: {}, link: {}".format(course, link))
         course_page = session.get(link, headers=dict(referer=link))
         soup = BeautifulSoup(course_page.text, 'html.parser')
+
+        text_list: List[str] = []
         for text in soup.find_all("div", {"class": "no-overflow"}):
             for text_block in text.find_all("p"):
                 text_list.append(text_block.getText())
-        for activity in soup.find_all("div", {"class": "activityinstance"}):
-            file_type = activity.find("img")["src"]
-            if "icon" not in file_type:
-                extension = ""
-                if "pdf" in file_type:
-                    extension = ".pdf"
-                elif "powerpoint" in file_type:
-                    extension = ".ppt"
-                file_name = activity.find("span", {"class": "instancename"}).text
-                file_name = file_name.replace(' File', '').strip() + extension
-                logger.info("Found file: {}".format(file_name))
-                file_link = activity.find("a").get('href')
-                logger.info("With file link: {}".format(file_link))
-                files_dict[file_name] = file_link
+
         if len(text_list) > 0:
             text_list = [text.replace(u'\xa0', u' ') for text in text_list]
             text_list = list(dict.fromkeys(text_list))
             text_per_course[course] = text_list
+
+        files_dict: Dict[str, str] = _get_files_dict(soup)
         files_per_course[course] = files_dict
 
     return files_per_course, text_per_course
 
 
-def create_saving_directory():
-    path = user_path + "/courses"
+def _get_files_dict(soup) -> Dict[str, str]:
+    files_dict: Dict[str, str] = {}
+
+    for activity in soup.find_all("div", {"class": "activityinstance"}):
+        file_type = activity.find("img")["src"]
+        if "icon" not in file_type:
+            extension = ""
+            if "pdf" in file_type:
+                extension = ".pdf"
+            elif "powerpoint" in file_type:
+                extension = ".ppt"
+            file_name = activity.find("span", {"class": "instancename"}).text
+            file_name = file_name.replace(' File', '').strip() + extension
+            logger.info("Found file: {}".format(file_name))
+            file_link = activity.find("a").get('href')
+            logger.info("With file link: {}".format(file_link))
+            files_dict[file_name] = file_link
+
+    return files_dict
+
+
+def create_saving_directory() -> str:
+    path: str = user_path + "/courses"
 
     if not os.path.exists(path):
         try:
@@ -192,27 +220,27 @@ def create_saving_directory():
     return path
 
 
-def save_text():
+def save_text() -> None:
     for course, paragraph in paragraphs.items():
-        current_path = save_path + "/" + course + "/course-information.txt"
+        current_path: str = save_path + "/" + course + "/course-information.txt"
         if os.path.exists(current_path):
             os.remove(current_path)
         with open(current_path, "w+") as write_file:
-            paragraph = [text + "\r\n" for text in paragraph]
+            paragraph: str = [text + "\r\n" for text in paragraph]
             write_file.writelines(paragraph)
         logger.info("Wrote info for {} successfully".format(course))
 
 
-def save_files():
+def save_files() -> None:
     for course, links in files.items():
-        current_path = save_path + "/" + course
+        current_path: str = save_path + "/" + course
         for name, link in links.items():
             threading.Thread(target=_parallel_save_files,
                              kwargs={'current_path': current_path, 'name': name, 'link': link}).start()
 
 
-def _parallel_save_files(current_path=None, name=None, link=None):
-    params_are_valid = current_path and name and link
+def _parallel_save_files(current_path=None, name=None, link=None) -> None:
+    params_are_valid: bool = current_path and name and link
 
     if params_are_valid:
         logger.info("Attempting parallel download of {}".format(name))
@@ -233,8 +261,8 @@ if __name__ == '__main__':
     moodle_url = "https://moodle.concordia.ca/moodle/"
     username, password, user_path, excluded_courses = get_config()
     session = get_session()
-    courses = get_courses()
+    courses: Dict[str, str] = get_courses()
     files, paragraphs = get_files()
-    save_path = create_saving_directory()
+    save_path: str = create_saving_directory()
     save_text()
     save_files()
