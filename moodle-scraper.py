@@ -89,7 +89,6 @@ def _get_username(config_parser: ConfigParser) -> str:
 
 def get_session() -> session():
     session_requests = requests.session()
-    session_requests.mount('https://', HTTPAdapter(pool_connections=80, pool_maxsize=80))
     login_url: str = moodle_url + "login/index.php"
     try:
         result = session_requests.get(login_url)
@@ -150,7 +149,8 @@ def get_courses() -> Dict[str, str]:
     return courses_dict
 
 
-def get_files() -> Tuple[Dict[str, Dict[str, str]], Dict[str, List[str]]]:
+def get_files() -> Tuple[Dict[str, Dict[str, str]], Dict[str, List[str]], int]:
+    num_of_files: int = 0
     files_per_course: Dict[str, Dict[str, str]] = {}
     text_per_course: Dict[str, List[str]] = {}
     logger.info("Going through each course Moodle page")
@@ -170,9 +170,11 @@ def get_files() -> Tuple[Dict[str, Dict[str, str]], Dict[str, List[str]]]:
             text_per_course[course] = text_list
 
         files_dict: Dict[str, str] = _get_files_dict(soup)
+        num_of_files = num_of_files + len(files_dict)
         files_per_course[course] = files_dict
 
-    return files_per_course, text_per_course
+    logger.debug(f"Size of pool: {num_of_files}")
+    return files_per_course, text_per_course, num_of_files
 
 
 def _get_files_dict(soup) -> Dict[str, str]:
@@ -266,7 +268,8 @@ if __name__ == '__main__':
     username, password, user_path, excluded_courses = get_config()
     session = get_session()
     courses: Dict[str, str] = get_courses()
-    files, paragraphs = get_files()
+    files, paragraphs, pool_size = get_files()
+    session.mount('https://', HTTPAdapter(pool_connections=pool_size, pool_maxsize=pool_size))
     save_path: str = create_saving_directory()
     save_text()
     save_files()
