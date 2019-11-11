@@ -22,7 +22,7 @@ def get_config() -> Tuple[str, str, str, List[str]]:
         exclusions: List[str] = _get_exclusions(config_parser)
 
     except Exception as e:
-        logger.error("Error with config file format | " + str(e))
+        logger.error(f"Error with config file format | {str(e)}")
         sys.exit(-1)
 
     return user, passwd, custom_path, exclusions
@@ -39,11 +39,12 @@ def _get_exclusions(config_parser: ConfigParser) -> List[str]:
             exclusions = [text.strip() for text in exclusions]
             logger.info("User defined course exclusions found in config file:")
             for text in exclusions:
-                logger.info("{}".format(text))
+                logger.info(f"{text}")
     return exclusions
 
 
 def _get_save_folder(config_parser: ConfigParser) -> str:
+    custom_path: str = ""
     if config_parser.has_option('moodle-scraper', 'folder'):
         custom_path: str = config_parser.get('moodle-scraper', 'folder')
     if not custom_path:
@@ -55,6 +56,7 @@ def _get_save_folder(config_parser: ConfigParser) -> str:
 
 
 def _get_password(config_parser: ConfigParser) -> str:
+    passwd: str = ""
     if "MOODLE_PASSWORD" in os.environ:
         logger.info("Password found in environment variables")
         passwd: str = os.environ["MOODLE_PASSWORD"]
@@ -70,6 +72,7 @@ def _get_password(config_parser: ConfigParser) -> str:
 
 
 def _get_username(config_parser: ConfigParser) -> str:
+    user: str = ""
     if "MOODLE_USERNAME" in os.environ:
         logger.info("Username found in environment variables")
         user: str = os.environ["MOODLE_USERNAME"]
@@ -91,7 +94,7 @@ def get_session() -> session():
     try:
         result = session_requests.get(login_url)
     except Exception as e:
-        logger.error("Could not connect to Moodle, it could be down | " + str(e))
+        logger.error(f"Could not connect to Moodle, it could be down | {str(e)}")
         sys.exit()
 
     soup = BeautifulSoup(result.text, 'html.parser')
@@ -99,12 +102,13 @@ def get_session() -> session():
 
     auth_data: Dict[str, str] = {
         'logintoken': authenticity_token,
-        'username'  : username,
-        'password'  : password
+        'username': username,
+        'password': password
     }
 
     logger.info("Attempting to authenticate...")
     result = session_requests.post(login_url, data=auth_data, headers=dict(referer=login_url))
+    logger.info(f"Status code: {result.status_code}")
 
     url: str = moodle_url + "my/"
     result = session_requests.get(url, headers=dict(referer=url))
@@ -139,7 +143,7 @@ def get_courses() -> Dict[str, str]:
         logger.error("Could not find any courses, exiting...")
         sys.exit()
     else:
-        logger.info("Found {} courses successfully:".format(len(courses_dict)))
+        logger.info(f"Found {len(courses_dict)} courses successfully:")
         for course in courses_dict.keys():
             logger.info(course)
 
@@ -151,7 +155,7 @@ def get_files() -> Tuple[Dict[str, Dict[str, str]], Dict[str, List[str]]]:
     text_per_course: Dict[str, List[str]] = {}
     logger.info("Going through each course Moodle page")
     for course, link in courses.items():
-        logger.info("Course name: {}, link: {}".format(course, link))
+        logger.info(f"Course name: {course}, link: {link}")
         course_page = session.get(link, headers=dict(referer=link))
         soup = BeautifulSoup(course_page.text, 'html.parser')
 
@@ -184,9 +188,9 @@ def _get_files_dict(soup) -> Dict[str, str]:
                 extension = ".ppt"
             file_name = activity.find("span", {"class": "instancename"}).text
             file_name = file_name.replace(' File', '').strip() + extension
-            logger.info("Found file: {}".format(file_name))
+            logger.info(f"Found file: {file_name}")
             file_link = activity.find("a").get('href')
-            logger.info("With file link: {}".format(file_link))
+            logger.info(f"With file link: {file_link}")
             files_dict[file_name] = file_link
 
     return files_dict
@@ -199,11 +203,11 @@ def create_saving_directory() -> str:
         try:
             os.mkdir(path)
         except OSError:
-            logger.error("Creation of the directory {} failed".format(path))
+            logger.error(f"Creation of the directory {path} failed")
         else:
-            logger.info("Successfully created the directory {} ".format(path))
+            logger.info(f"Successfully created the directory {path} ")
     else:
-        logger.info("{} exists and will be used to save files".format(path))
+        logger.info(f"{path} exists and will be used to save files")
 
     for course in files.keys():
         course_path = path + "/" + course
@@ -211,11 +215,11 @@ def create_saving_directory() -> str:
             try:
                 os.mkdir(course_path)
             except OSError:
-                logger.error("Creation of the directory {} failed".format(course_path))
+                logger.error(f"Creation of the directory {course_path} failed")
             else:
-                logger.info("Successfully created the directory {} ".format(course_path))
+                logger.info(f"Successfully created the directory {course_path} ")
         else:
-            logger.info("{} exists and will be used to save files".format(course_path))
+            logger.info(f"{course_path} exists and will be used to save files")
 
     return path
 
@@ -226,9 +230,9 @@ def save_text() -> None:
         if os.path.exists(current_path):
             os.remove(current_path)
         with open(current_path, "w+") as write_file:
-            paragraph: str = [text + "\r\n" for text in paragraph]
+            paragraph: List[str] = [text + "\r\n" for text in paragraph]
             write_file.writelines(paragraph)
-        logger.info("Wrote info for {} successfully".format(course))
+        logger.info(f"Wrote info for {course} successfully")
 
 
 def save_files() -> None:
@@ -243,13 +247,13 @@ def _parallel_save_files(current_path=None, name=None, link=None) -> None:
     params_are_valid: bool = current_path and name and link
 
     if params_are_valid:
-        logger.info("Attempting parallel download of {}".format(name))
+        logger.info(f"Attempting parallel download of {name}")
         try:
             request = session.get(link, headers=dict(referer=link))
             with open(current_path + '/' + name, 'wb') as write_file:
                 write_file.write(request.content)
         except Exception as e:
-            logger.error("File with same name is open | " + str(e))
+            logger.error(f"File with same name is open | {str(e)}")
     else:
         logger.error("Some parameters were missing for parallel downloads")
 
