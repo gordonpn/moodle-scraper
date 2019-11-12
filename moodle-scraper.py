@@ -241,8 +241,10 @@ def save_files() -> None:
     for course, links in files.items():
         current_path: str = save_path + "/" + course
         for name, link in links.items():
-            threading.Thread(target=_parallel_save_files,
-                             kwargs={'current_path': current_path, 'name': name, 'link': link}).start()
+            t = threading.Thread(target=_parallel_save_files,
+                                 kwargs={'current_path': current_path, 'name': name, 'link': link})
+            threads_list.append(t)
+            t.start()
 
 
 def _parallel_save_files(current_path=None, name=None, link=None) -> None:
@@ -260,7 +262,16 @@ def _parallel_save_files(current_path=None, name=None, link=None) -> None:
         logger.error("Some parameters were missing for parallel downloads")
 
 
+def clean_up() -> None:
+    for thread in threads_list:
+        logger.debug(f"Joining: {thread.getName()}")
+        thread.join()
+
+    logger.debug("Done")
+
+
 if __name__ == '__main__':
+    threads_list: List[threading.Thread] = []
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
@@ -273,3 +284,4 @@ if __name__ == '__main__':
     save_path: str = create_saving_directory()
     save_text()
     save_files()
+    clean_up()
