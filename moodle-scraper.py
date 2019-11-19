@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import threading
+import time
 from subprocess import STDOUT, PIPE
 from configparser import ConfigParser
 from typing import Dict, List, Tuple
@@ -288,7 +289,9 @@ def convert_to_pdf() -> None:
 
 
 def clean_duplicates():
-    pass
+    time.sleep(60)
+    for file_ in files_to_remove:
+        os.remove(file_)
 
 
 if __name__ == '__main__':
