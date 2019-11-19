@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 import threading
-from subprocess import STDOUT
+from subprocess import STDOUT, PIPE
 from configparser import ConfigParser
 from typing import Dict, List, Tuple
 
@@ -278,9 +278,10 @@ def convert_to_pdf() -> None:
     for course_path in course_paths_list:
         for file_ in os.listdir(course_path):
             if file_.endswith('.ppt'):
-                t = threading.Thread(target=_parallel_convert, kwargs={'file_': file_, 'cwd': course_path + "/"})
-                converting_threads_list.append(t)
-                t.start()
+                _parallel_convert(file_=file_, cwd=course_path + "/")
+        # t = threading.Thread(target=_parallel_convert, kwargs={'file_': file_, 'cwd': course_path + "/"})
+        # converting_threads_list.append(t)
+        # t.start()
 
 
 def _parallel_convert(file_=None, cwd=None) -> None:
@@ -288,7 +289,10 @@ def _parallel_convert(file_=None, cwd=None) -> None:
 
     if params_are_valid:
         logger.info(f'Attempting to parallel convert to PDF of {cwd + file_}')
-        subprocess.Popen(["libreoffice", "--headless", "--convert-to", "pdf", file_], cwd=cwd)
+        process = subprocess.Popen(["libreoffice", "--headless", "--convert-to", "pdf", file_], cwd=cwd, stdout=PIPE,
+                                   stderr=STDOUT)
+        for line in process.stdout:
+            logger.debug(line)
         files_to_remove.append(cwd + file_)
 
 
