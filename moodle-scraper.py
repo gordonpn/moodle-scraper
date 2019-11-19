@@ -288,7 +288,8 @@ def _parallel_convert(file_=None, cwd=None) -> None:
 
     if params_are_valid:
         logger.info(f'Attempting to parallel convert to PDF of {cwd + file_}')
-        process = subprocess.Popen(["soffice", "--headless", "--convert-to", "pdf", "--outdir", "cwd", cwd + file_],
+        process = subprocess.Popen(["libreoffice", "--headless", "--convert-to", "pdf", "--outdir", "cwd", cwd + file_],
+                                   cwd=cwd,
                                    stderr=STDOUT, stdout=STDOUT)
         for line in process.stdout:
             logger.debug(line)
