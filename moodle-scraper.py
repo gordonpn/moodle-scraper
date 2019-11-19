@@ -277,7 +277,7 @@ def convert_to_pdf() -> None:
     for course_path in course_paths_list:
         for file_ in os.listdir(course_path):
             if file_.endswith('.ppt'):
-                t = threading.Thread(target=_parallel_convert, kwargs={'file': file_, 'cwd': course_path + '/'})
+                t = threading.Thread(target=_parallel_convert, kwargs={'file_': file_, 'cwd': course_path + '/'})
                 converting_threads_list.append(t)
                 t.start()
 
