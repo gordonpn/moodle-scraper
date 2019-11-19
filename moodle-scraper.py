@@ -278,7 +278,7 @@ def convert_to_pdf() -> None:
     for course_path in course_paths_list:
         for file_ in os.listdir(course_path):
             if file_.endswith('.ppt'):
-                t = threading.Thread(target=_parallel_convert, kwargs={'file_': file_, 'cwd': course_path + '/'})
+                t = threading.Thread(target=_parallel_convert, kwargs={'file_': file_, 'cwd': course_path})
                 converting_threads_list.append(t)
                 t.start()
 
@@ -287,7 +287,7 @@ def _parallel_convert(file_=None, cwd=None) -> None:
     params_are_valid: bool = file_ and cwd
 
     if params_are_valid:
-        logger.info(f'Attempting to parallel convert to PDF of {cwd + file_}')
+        logger.info(f'Attempting to parallel convert to PDF of {cwd + "/" + file_}')
         process = subprocess.Popen(["soffice", "--headless", "--convert-to", "pdf", "--outdir", ".", file_], cwd=cwd,
                                    stderr=STDOUT, stdout=STDOUT)
         for line in process.stdout:
