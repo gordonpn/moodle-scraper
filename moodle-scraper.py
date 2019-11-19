@@ -189,7 +189,7 @@ def _get_files_dict(soup) -> Dict[str, str]:
             if "pdf" in file_type:
                 extension = ".pdf"
             elif "powerpoint" in file_type:
-                extension = ".pptx"
+                extension = ".ppt"
             elif "archive" in file_type:
                 extension = ".zip"
             file_name = activity.find("span", {"class": "instancename"}).text
@@ -277,7 +277,7 @@ def clean_up_threads() -> None:
 def convert_to_pdf() -> None:
     for course_path in course_paths_list:
         for file_ in os.listdir(course_path):
-            if file_.endswith('.pptx'):
+            if file_.endswith('.ppt'):
                 t = threading.Thread(target=_parallel_convert, kwargs={'file_': file_, 'cwd': course_path + "/"})
                 converting_threads_list.append(t)
                 t.start()
@@ -289,8 +289,7 @@ def _parallel_convert(file_=None, cwd=None) -> None:
     if params_are_valid:
         logger.info(f'Attempting to parallel convert to PDF of {cwd + file_}')
         process = subprocess.Popen(["libreoffice", "--headless", "--convert-to", "pdf", file_],
-                                   cwd=cwd,
-                                   stderr=STDOUT)
+                                   cwd=cwd)
         for line in process.stdout:
             logger.debug(line)
         process.wait()
