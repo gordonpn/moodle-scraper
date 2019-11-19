@@ -297,9 +297,9 @@ def clean_up_files(removal_list=None) -> None:
         logger.debug(f'Joining converting threads: {thread.getName()}')
         thread.join()
 
-    for file_ in removal_list:
-        logger.debug(f'Removing {file_}')
-        os.remove(file_)
+    # for file_ in removal_list:
+    #     logger.debug(f'Removing {file_}')
+    #     os.remove(file_)
 
 
 if __name__ == '__main__':
