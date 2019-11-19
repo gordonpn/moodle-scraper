@@ -297,9 +297,9 @@ def clean_up_files(removal_list=None) -> None:
         logger.debug(f'Joining converting threads: {thread.getName()}')
         thread.join()
 
-    # for file_ in removal_list:
-    #     logger.debug(f'Removing {file_}')
-    #     os.remove(file_)
+    for file_ in removal_list:
+        logger.debug(f'Removing {file_}')
+        os.remove(file_)
 
 
 if __name__ == '__main__':
@@ -320,4 +320,4 @@ if __name__ == '__main__':
     clean_up_threads()
     files_to_remove: List[str] = []
     convert_to_pdf()
-    clean_up_files(files_to_remove)
+    # clean_up_files(files_to_remove)
