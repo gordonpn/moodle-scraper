@@ -269,7 +269,7 @@ def _parallel_save_files(current_path=None, name=None, link=None) -> None:
 
 def clean_up_threads() -> None:
     for thread in threads_list:
-        logger.debug(f"Joining: {thread.getName()}")
+        logger.debug(f"Joining downloading threads: {thread.getName()}")
         thread.join()
 
 
@@ -294,7 +294,7 @@ def _parallel_convert(file_=None, cwd=None) -> None:
 
 def clean_up_files() -> None:
     for thread in converting_threads_list:
-        logger.debug(f'Joining: {thread.getName()}')
+        logger.debug(f'Joining converting threads: {thread.getName()}')
         thread.join()
 
 
