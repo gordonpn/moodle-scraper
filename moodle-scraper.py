@@ -289,14 +289,17 @@ def _parallel_convert(file_=None, cwd=None) -> None:
     if params_are_valid:
         logger.info(f'Attempting to parallel convert to PDF of {cwd + file_}')
         subprocess.Popen(["libreoffice", "--headless", "--convert-to", "pdf", file_], cwd=cwd)
-        logger.info(f'Removing {file_}')
-        os.remove(cwd + file_)
+        files_to_remove.append(cwd + file_)
 
 
-def clean_up_files() -> None:
+def clean_up_files(removal_list=None) -> None:
     for thread in converting_threads_list:
         logger.debug(f'Joining converting threads: {thread.getName()}')
         thread.join()
+
+    for file_ in removal_list:
+        logger.debug(f'Removing {file_}')
+        os.remove(file_)
 
 
 if __name__ == '__main__':
@@ -315,5 +318,6 @@ if __name__ == '__main__':
     save_text()
     save_files()
     clean_up_threads()
+    files_to_remove: List[str] = []
     convert_to_pdf()
-    clean_up_files()
+    clean_up_files(files_to_remove)
