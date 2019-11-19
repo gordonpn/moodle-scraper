@@ -287,7 +287,7 @@ def _parallel_convert(file_=None, cwd=None) -> None:
 
     if params_are_valid:
         logger.info(f'Attempting to parallel convert to PDF of {cwd + file_}')
-        subprocess.Popen(["soffice", "--convert-to", "pdf", "--outdir", ".", file_], cwd=cwd)
+        subprocess.Popen(["soffice", "--headless", "--convert-to", "pdf", "--outdir", ".", file_], cwd=cwd)
         logger.info(f'Removing {file_}')
         os.remove(cwd + file_)
 
