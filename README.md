@@ -1,12 +1,16 @@
 # moodle-scraper
 
+## Motivation
+
+This project started because of an annoyance I had with having to check the Moodle website several times manually per day for each course I was taking to see if my profs uploaded something new. As well as sometimes profs would upload files with formats such as .docx or .pptx. I believe that .pdf is the most convenient format to distribute lectures, assignment sheets, etc.
+
 ## Description
 
 A Moodle scraper written for Concordia's Moodle. It may or may not work for other schools, but that remains untested and I have no intention of trying. Thus, I did not provide a way to configure the moodle website in the configuration file.
 
-This project started because of an annoyance I had with having to check the Moodle website several times manually per day for each course I was taking to see if my profs uploaded something new.
+Each time this script is ran, it will download the PDF and PPT files into the root of where this project is cloned (unless defined otherwise, more on that later) and neatly organize them in their respective directories named after the course name. It will also scrape any information that the prof wrote themselves on the Moodle page and neatly put that text in a .txt file.
 
-Each time this script is run, it will download the PDF and PPT files into the root of where the .py file residing (unless defined otherwise) and neatly organize them in their respective directories named after the course name. It will also scrape any information that the prof wrote themselves on the Moodle page and neatly put that text in a .txt file.
+It will then convert the PowerPoint files to the .pdf format.
 
 ## Installation
 
@@ -16,13 +20,27 @@ Each time this script is run, it will download the PDF and PPT files into the ro
 ````bash
 pip3 install -r requirements.txt
 ````
+## Configuration
+
+Create a file and name it `moodle-scraper.conf` with the following contents:
+````
+[moodle-scraper]
+username = 
+password = 
+folder =
+exclusions =
+````
+
+Where `username` is your moodle username and `password` is your moodle password.
+You may also use environment variables to store your moodle username and moodle password.
+
+`folder` is the root folder where you want the scrapings to be stored. Can be left undefined and the script will save them where you cloned the project.
+
+`exclusions` is a list of moodle courses you want to exclude from scraping. Sometimes profs do not deactivate a certain course after the semester is over and thus the course becomes irrelevant to the current semester. Each course you list here is comma (,) separated. You may list the full course name as on moodle or part of the name as well.
 
 ## Usage
 
-1.  Edit the configuration 'moodle-scraper.conf' with the needed information (you could also put your username and password as environment variables if you don't feel safe and know how to)
-    *  If you decide to use environment variables, you must set them as MOODLE_USERNAME and MOODLE_PASSWORD
-    *  You may also define a root folder where the scraper will save the files
-2.  Simply run the application and enjoy
+Simply run the application and enjoy
 ````bash
 python3 moodle-scraper.py
 ````
@@ -34,7 +52,8 @@ You can contact me if there are any questions or problems, or open an issue.
 ## Roadmap and todo
 
 *  [ ] Support other possible file types
-*  [ ] Improve running time by using async or threads
+*  [x] Improve running time by using async or threads
+*  [ ] Refactor code for better maintainability
 
 ## Contributing
 
@@ -42,7 +61,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## License
 
-[MIT License](https://choosealicense.com/licenses/mit/)
+[Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)
 
 ## Project status
 
