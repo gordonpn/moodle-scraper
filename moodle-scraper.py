@@ -1,5 +1,6 @@
 import logging
 import os
+import subprocess
 import sys
 import threading
 from configparser import ConfigParser
@@ -188,6 +189,8 @@ def _get_files_dict(soup) -> Dict[str, str]:
                 extension = ".pdf"
             elif "powerpoint" in file_type:
                 extension = ".ppt"
+            elif "archive" in file_type:
+                extension = ".zip"
             file_name = activity.find("span", {"class": "instancename"}).text
             file_name = file_name.replace(' File', '').strip() + extension
             logger.info(f"Found file: {file_name}")
@@ -198,8 +201,9 @@ def _get_files_dict(soup) -> Dict[str, str]:
     return files_dict
 
 
-def create_saving_directory() -> str:
+def create_saving_directory() -> Tuple[str, List[str]]:
     path: str = user_path + "/courses"
+    course_paths: List[str] = []
 
     if not os.path.exists(path):
         try:
@@ -213,17 +217,18 @@ def create_saving_directory() -> str:
 
     for course in files.keys():
         course_path = path + "/" + course
+        course_paths.append(course_path)
         if not os.path.exists(course_path):
             try:
                 os.mkdir(course_path)
             except OSError:
                 logger.error(f"Creation of the directory {course_path} failed")
             else:
-                logger.info(f"Successfully created the directory {course_path} ")
+                logger.info(f"Successfully created the directory {course_path}")
         else:
             logger.info(f"{course_path} exists and will be used to save files")
 
-    return path
+    return path, course_paths
 
 
 def save_text() -> None:
@@ -262,16 +267,40 @@ def _parallel_save_files(current_path=None, name=None, link=None) -> None:
         logger.error("Some parameters were missing for parallel downloads")
 
 
-def clean_up() -> None:
+def clean_up_threads() -> None:
     for thread in threads_list:
         logger.debug(f"Joining: {thread.getName()}")
         thread.join()
 
-    logger.debug("Done")
+
+def convert_to_pdf() -> None:
+    for course_path in course_paths_list:
+        for file_ in os.listdir(course_path):
+            if file_.endswith('.ppt'):
+                t = threading.Thread(target=_parallel_convert, kwargs={'file': file_, 'cwd': course_path + '/'})
+                converting_threads_list.append(t)
+                t.start()
+
+
+def _parallel_convert(file_=None, cwd=None) -> None:
+    params_are_valid: bool = file_ and cwd
+
+    if params_are_valid:
+        logger.info(f'Attempting to parallel convert to PDF of {cwd + file_}')
+        subprocess.Popen(["soffice", "--convert-to", "pdf", "--outdir", cwd, cwd + file_], cwd=cwd)
+        logger.info(f'Removing {file_}')
+        os.remove(cwd + file_)
+
+
+def clean_up_files() -> None:
+    for thread in converting_threads_list:
+        logger.debug(f'Joining: {thread.getName()}')
+        thread.join()
 
 
 if __name__ == '__main__':
     threads_list: List[threading.Thread] = []
+    converting_threads_list: List[threading.Thread] = []
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
@@ -281,7 +310,9 @@ if __name__ == '__main__':
     courses: Dict[str, str] = get_courses()
     files, paragraphs, pool_size = get_files()
     session.mount('https://', HTTPAdapter(pool_connections=pool_size, pool_maxsize=pool_size))
-    save_path: str = create_saving_directory()
+    save_path, course_paths_list = create_saving_directory()
     save_text()
     save_files()
-    clean_up()
+    clean_up_threads()
+    convert_to_pdf()
+    clean_up_files()
