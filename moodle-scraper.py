@@ -320,4 +320,5 @@ if __name__ == '__main__':
     clean_up_threads()
     files_to_remove: List[str] = []
     convert_to_pdf()
+    [t.join() for t in converting_threads_list]
     # clean_up_files(files_to_remove)
