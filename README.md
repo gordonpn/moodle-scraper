@@ -53,7 +53,7 @@ You can contact me if there are any questions or problems, or open an issue.
 
 *  [ ] Support other possible file types
 *  [x] Improve running time by using async or threads
-*  [ ] Refactor code for better maintainability
+*  [x] Refactor code for better maintainability
 
 ## Contributing
 
@@ -61,7 +61,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## License
 
-[Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)
+[MIT License](https://choosealicense.com/licenses/mit/)
 
 ## Project status
 
