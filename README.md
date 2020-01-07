@@ -1,6 +1,6 @@
 # moodle-scraper
 
-## Motivation
+## Description
 
 This project started because of an annoyance I had with having to check the Moodle website several times manually per day for each course I was taking to see if my profs uploaded something new. As well as sometimes profs would upload files with formats such as .docx or .pptx. I believe that .pdf is the most convenient format to distribute lectures, assignment sheets, etc.
 
@@ -54,15 +54,8 @@ You can contact me if there are any questions or problems, or open an issue.
 *  [ ] Support other possible file types
 *  [x] Improve running time by using async or threads
 *  [x] Refactor code for better maintainability
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. 
+*  [ ] Add command line flags to skip conversion
 
 ## License
 
 [MIT License](https://choosealicense.com/licenses/mit/)
-
-## Project status
-
-This project will be maintained as long as I am in school.
