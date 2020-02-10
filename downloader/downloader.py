@@ -93,7 +93,7 @@ class Downloader:
             sys.exit()
         else:
             self.logger.info(f"Found {len(courses_dict)} courses successfully:")
-            for course in courses_dict.keys():
+            for course in courses_dict:
                 self.logger.info(course)
 
         return courses_dict
@@ -113,13 +113,13 @@ class Downloader:
                 for text_block in text.find_all("p"):
                     text_list.append(text_block.getText())
 
-            if len(text_list) > 0:
+            if text_list:
                 text_list = [text.replace(u'\xa0', u' ') for text in text_list]
                 text_list = list(dict.fromkeys(text_list))
                 text_per_course[course] = text_list
 
             files_dict: Dict[str, str] = self._get_files_dict(soup)
-            num_of_files = num_of_files + len(files_dict)
+            num_of_files += len(files_dict)
             files_per_course[course] = files_dict
 
         self.logger.debug(f"Size of pool: {num_of_files}")
@@ -140,6 +140,10 @@ class Downloader:
                     extension = ".ppt"
                 elif "archive" in file_type:
                     extension = ".zip"
+                elif "text" in file_type:
+                    extension = ".txt"
+                elif "spreadsheet" in file_type:
+                    extension = ".xls"
                 file_name = activity.find("span", {"class": "instancename"}).text
                 file_name = file_name.replace(' File', '').strip() + extension
                 self.logger.info(f"Found file: {file_name}")

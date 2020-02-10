@@ -43,7 +43,7 @@ exclusions =
 Where `username` is your moodle username and `password` is your moodle password.
 You may also use environment variables to store your moodle username and moodle password.
 
-`folder` is the root folder where you want the scrapings to be stored. Can be left undefined and the script will save them where you cloned the project.
+`folder` is the root folder where you want the scrapings to be stored. Can be left undefined, and the script will save them where you cloned the project.
 
 `exclusions` is a list of moodle courses you want to exclude from scraping. Sometimes profs do not deactivate a certain course after the semester is over and thus the course becomes irrelevant to the current semester. Each course you list here is comma (,) separated. You may list the full course name as on moodle or part of the name as well.
 
@@ -60,7 +60,7 @@ You can contact me if there are any questions or problems, or open an issue.
 
 ## Roadmap and todo
 
-*  [ ] Support other possible file types
+*  [x] Support other possible file types
 *  [x] Improve running time by using async or threads
 *  [x] Refactor code for better maintainability
 *  [ ] Add command line flags to skip conversion
