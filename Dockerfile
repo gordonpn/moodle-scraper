@@ -2,12 +2,34 @@ FROM ubuntu:eoan
 
 RUN apt update && apt upgrade -y
 RUN apt install -y \
-  software-properties-common
-RUN add-apt-repository -y ppa:deadsnakes/ppa
-RUN apt update && apt install -y \
+  build-essential \
+  curl \
+  git \
+  libbz2-dev \
+  libffi-dev \
+  liblzma-dev \
+  libncurses5-dev \
+  libncursesw5-dev \
+  libreadline-dev \
   libreoffice \
-  python3.8 \
-  python3.8-distutils
+  libsqlite3-dev \
+  libssl-dev \
+  llvm \
+  make \
+  python-openssl \
+  tk-dev \
+  wget \
+  xz-utils \
+  zlib1g-dev
+
+RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+
+RUN echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.profile
+RUN echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.profile
+
+RUN source ~/.profile
+
+RUN pyenv install 3.8.2
 
 RUN python3.8 -m pip install --upgrade pip setuptools wheel
 
