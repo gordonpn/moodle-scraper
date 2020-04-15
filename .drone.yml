@@ -9,8 +9,10 @@ steps:
     settings:
       channel: drone-ci
       template: >
-        {{build.event}} on branch {{build.branch}} from repo {{repo.name}} \n
-        build #{{build.number}} started! \n
+        {{build.event}} on branch {{build.branch}} from repo {{repo.name}}
+
+        build #{{build.number}} started!
+
         {{build.link}}
       webhook:
         from_secret: SLACK_WEBHOOK_URL
