@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  moodle-scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      -
+    environment:
+
