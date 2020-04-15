@@ -12,5 +12,4 @@ services:
       - MOODLE_PASSWORD
       - MOODLE_USERNAME
       - TZ=America/Montreal
-      - DEBIAN_FRONTEND=noninteractive
       - UID=1000
