@@ -363,3 +363,4 @@ Temporary Items
 .idea/vcs.xml
 .idea/pylint.xml
 /courses/
+moodle-scraper.conf
