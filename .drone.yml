@@ -21,7 +21,7 @@ steps:
     settings:
       channel: drone-ci
       template: >
-        {{build.event}} on {{build.branch}}
+        {{build.event}} on {{build.branch}}:
         {{#success build.status}}
         build {{build.number}} succeeded!
         {{else}}

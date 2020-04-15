@@ -1,11 +1,13 @@
 FROM ubuntu:eoan
 
-RUN apt update && add-apt-repository -y ppa:deadsnakes/ppa
+RUN apt update && apt upgrade -y
+RUN apt install -y \
+  software-properties-common
+RUN add-apt-repository -y ppa:deadsnakes/ppa
 RUN apt update && apt install -y \
   libreoffice \
   python3.8 \
-  python3.8-distutils \
-  software-properties-common
+  python3.8-distutils
 
 RUN python3.8 -m pip install --upgrade pip setuptools wheel
 
