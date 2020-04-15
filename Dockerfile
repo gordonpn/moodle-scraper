@@ -27,16 +27,12 @@ RUN apt install -y \
 RUN ln -fs /usr/share/zoneinfo/America/Montreal /etc/localtime
 RUN dpkg-reconfigure --frontend noninteractive tzdata
 
-RUN useradd -rm -d /home/appuser -s /bin/bash -u 1000 appuser
-WORKDIR /home/appuser
-USER appuser
-
 RUN git clone https://github.com/pyenv/pyenv.git /home/appuser/.pyenv
 
 RUN echo 'export PYENV_ROOT="/home/appuser/.pyenv"' >> /home/appuser/.profile
 RUN echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> /home/appuser/.profile
 
-RUN source /home/appuser/.profile
+RUN /bin/bash -c source /home/appuser/.profile
 
 RUN pyenv install 3.8.2
 
@@ -44,6 +40,10 @@ RUN python -m pip install --upgrade pip setuptools wheel
 
 COPY requirements.txt /tmp/
 RUN python -m pip install -r /tmp/requirements.txt
+
+RUN useradd -rm -d /home/appuser -s /bin/bash -u 1000 appuser
+WORKDIR /home/appuser
+USER appuser
 
 RUN mkdir -p courses
 
