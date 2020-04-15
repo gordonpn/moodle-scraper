@@ -56,7 +56,7 @@ class Downloader:
             )
 
         session_requests = requests.session()
-        login_url: str = self.moodle_url + "login/index.php"
+        login_url: str = f"{self.moodle_url}login/index.php"
         try:
             result = session_requests.get(login_url)
         except Exception as e:
@@ -78,7 +78,7 @@ class Downloader:
         )
         logger.info(f"Status code: {result.status_code}")
 
-        url: str = self.moodle_url + "my/"
+        url: str = f"{self.moodle_url}my/"
         result = session_requests.get(url, headers=dict(referer=url))
         soup = BeautifulSoup(result.text, "html.parser")
 
@@ -92,7 +92,7 @@ class Downloader:
 
     def get_courses(self) -> Dict[str, str]:
         courses_dict: Dict[str, str] = {}
-        url: str = self.moodle_url + "my/"
+        url: str = f"{self.moodle_url}my/"
         result = self.session.get(url, headers=dict(referer=url))
         soup = BeautifulSoup(result.text, "html.parser")
         for header in soup.find_all("h4", {"class": "media-heading"}):
@@ -194,7 +194,7 @@ class Downloader:
             logger.info(f"{path} exists and will be used to save files")
 
         for course in self.files.keys():
-            course_path = path + "/" + course
+            course_path = f"{path}/{course}"
             course_paths.append(course_path)
             if not os.path.exists(course_path):
                 try:
@@ -211,17 +211,17 @@ class Downloader:
 
     def save_text(self) -> None:
         for course, paragraph in self.paragraphs.items():
-            current_path: str = self.save_path + "/" + course + "/course-information.txt"
+            current_path: str = f"{self.save_path}/{course}/course-information.txt"
             if os.path.exists(current_path):
                 os.remove(current_path)
             with open(current_path, "w+") as write_file:
-                paragraph_text: List[str] = [text + "\r\n" for text in paragraph]
+                paragraph_text: List[str] = [f"{text}\r\n" for text in paragraph]
                 write_file.writelines(paragraph_text)
             logger.info(f"Wrote info for {course} successfully")
 
     def save_files(self) -> None:
         for course, links in self.files.items():
-            current_path: str = self.save_path + "/" + course
+            current_path: str = f"{self.save_path}/{course}"
             for name, link in links.items():
                 t = threading.Thread(
                     target=self._parallel_save_files,
@@ -237,7 +237,7 @@ class Downloader:
             logger.info(f"Attempting parallel download of {name}")
             try:
                 request = self.session.get(link, headers=dict(referer=link))
-                with open(current_path + "/" + name, "wb") as write_file:
+                with open(f"{current_path}/{name}", "wb") as write_file:
                     write_file.write(request.content)
             except Exception as e:
                 logger.error(f"File with same name is open | {str(e)}")
