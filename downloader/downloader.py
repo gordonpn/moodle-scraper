@@ -1,5 +1,6 @@
 import logging
 import os
+from os import path
 import pathlib
 import sys
 import threading
@@ -12,7 +13,6 @@ from requests.adapters import HTTPAdapter
 
 from configuration.config import Config
 
-logging.config.fileConfig(pathlib.Path(__file__).parent / "logging.ini")
 logger = logging.getLogger(__name__)
 
 

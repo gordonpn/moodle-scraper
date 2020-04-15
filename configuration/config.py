@@ -1,11 +1,10 @@
 import logging
-import pathlib
+from os import path
 import sys
 from configparser import ConfigParser
 from logging.config import fileConfig
 from typing import List
 
-logging.config.fileConfig(pathlib.Path(__file__).parent / "logging.ini")
 logger = logging.getLogger(__name__)
 
 

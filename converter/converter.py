@@ -1,13 +1,12 @@
 import logging
 import os
-import pathlib
 import subprocess
 import time
 from logging.config import fileConfig
 from subprocess import PIPE, STDOUT
+from os import path
 from typing import List
 
-logging.config.fileConfig(pathlib.Path(__file__).parent / "logging.ini")
 logger = logging.getLogger(__name__)
 
 
