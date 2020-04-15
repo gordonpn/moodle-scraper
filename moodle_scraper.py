@@ -48,6 +48,7 @@ def arguments_parser() -> argparse.Namespace:
 
 if __name__ == "__main__":
     args: argparse.Namespace = arguments_parser()
+    downloader = Downloader(args.username, args.password, args.directory)
 
 # downloader = Downloader()
 # downloader.run()

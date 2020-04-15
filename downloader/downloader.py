@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import threading
@@ -6,16 +7,22 @@ from typing import Dict, List
 import requests
 from bs4 import BeautifulSoup
 from requests import session
+from logging.config import fileConfig
+
 from requests.adapters import HTTPAdapter
 
 from configuration.config import Config
-from configuration.logger import get_logger
+
+logging.config.fileConfig("logging.ini")
+logger = logging.getLogger(__name__)
 
 
 class Downloader:
-    def __init__(self):
+    def __init__(self, username, password, directory):
+        self.username = os.getenv("USERNAME", username)
+        self.password = os.getenv("PASSWORD", password)
+        self.directory = directory
         self.config: Config = Config()
-        self.logger = get_logger()
         self.threads_list: List[threading.Thread] = []
         self.moodle_url: str = "https://moodle.concordia.ca/moodle/"
         self.session = None
@@ -40,15 +47,13 @@ class Downloader:
         self.save_files()
         self.clean_up_threads()
 
-    def get_session(self):
+    def get_session(self) -> requests.Session:
         session_requests = requests.session()
         login_url: str = self.moodle_url + "login/index.php"
         try:
             result = session_requests.get(login_url)
         except Exception as e:
-            self.logger.error(
-                f"Could not connect to Moodle, it could be down | {str(e)}"
-            )
+            logger.error(f"Could not connect to Moodle, it could be down | {str(e)}")
             sys.exit()
 
         soup = BeautifulSoup(result.text, "html.parser")
@@ -60,20 +65,20 @@ class Downloader:
             "password": self.config.password,
         }
 
-        self.logger.info("Attempting to authenticate...")
+        logger.info("Attempting to authenticate...")
         result = session_requests.post(
             login_url, data=auth_data, headers=dict(referer=login_url)
         )
-        self.logger.info(f"Status code: {result.status_code}")
+        logger.info(f"Status code: {result.status_code}")
 
         url: str = self.moodle_url + "my/"
         result = session_requests.get(url, headers=dict(referer=url))
         soup = BeautifulSoup(result.text, "html.parser")
 
         if soup.title.string == "Dashboard":
-            self.logger.info("Authentication successful")
+            logger.info("Authentication successful")
         else:
-            self.logger.info("Authentication unsuccessful, exiting...")
+            logger.info("Authentication unsuccessful, exiting...")
             sys.exit(-1)
 
         return session_requests
@@ -95,12 +100,12 @@ class Downloader:
                         courses_dict.pop(course)
 
         if not bool(courses_dict):
-            self.logger.error("Could not find any courses, exiting...")
+            logger.error("Could not find any courses, exiting...")
             sys.exit()
         else:
-            self.logger.info(f"Found {len(courses_dict)} courses successfully:")
+            logger.info(f"Found {len(courses_dict)} courses successfully:")
             for course in courses_dict:
-                self.logger.info(course)
+                logger.info(course)
 
         return courses_dict
 
@@ -108,9 +113,9 @@ class Downloader:
         num_of_files: int = 0
         files_per_course: Dict[str, Dict[str, str]] = {}
         text_per_course: Dict[str, List[str]] = {}
-        self.logger.info("Going through each course Moodle page")
+        logger.info("Going through each course Moodle page")
         for course, link in self.courses.items():
-            self.logger.info(f"Course name: {course}, link: {link}")
+            logger.info(f"Course name: {course}, link: {link}")
             course_page = self.session.get(link, headers=dict(referer=link))
             soup = BeautifulSoup(course_page.text, "html.parser")
 
@@ -128,7 +133,7 @@ class Downloader:
             num_of_files += len(files_dict)
             files_per_course[course] = files_dict
 
-        self.logger.debug(f"Size of pool: {num_of_files}")
+        logger.debug(f"Size of pool: {num_of_files}")
         self.files = files_per_course
         self.paragraphs = text_per_course
         self.pool_size = num_of_files
@@ -152,9 +157,9 @@ class Downloader:
                     extension = ".xls"
                 file_name = activity.find("span", {"class": "instancename"}).text
                 file_name = file_name.replace(" File", "").strip() + extension
-                self.logger.info(f"Found file: {file_name}")
+                logger.info(f"Found file: {file_name}")
                 file_link = activity.find("a").get("href")
-                self.logger.info(f"With file link: {file_link}")
+                logger.info(f"With file link: {file_link}")
                 files_dict[file_name] = file_link
 
         return files_dict
@@ -167,11 +172,11 @@ class Downloader:
             try:
                 os.mkdir(path)
             except OSError:
-                self.logger.error(f"Creation of the directory {path} failed")
+                logger.error(f"Creation of the directory {path} failed")
             else:
-                self.logger.info(f"Successfully created the directory {path} ")
+                logger.info(f"Successfully created the directory {path} ")
         else:
-            self.logger.info(f"{path} exists and will be used to save files")
+            logger.info(f"{path} exists and will be used to save files")
 
         for course in self.files.keys():
             course_path = path + "/" + course
@@ -180,13 +185,11 @@ class Downloader:
                 try:
                     os.mkdir(course_path)
                 except OSError:
-                    self.logger.error(f"Creation of the directory {course_path} failed")
+                    logger.error(f"Creation of the directory {course_path} failed")
                 else:
-                    self.logger.info(
-                        f"Successfully created the directory {course_path}"
-                    )
+                    logger.info(f"Successfully created the directory {course_path}")
             else:
-                self.logger.info(f"{course_path} exists and will be used to save files")
+                logger.info(f"{course_path} exists and will be used to save files")
 
         self.save_path = path
         self.course_paths_list = course_paths
@@ -199,7 +202,7 @@ class Downloader:
             with open(current_path, "w+") as write_file:
                 paragraph_text: List[str] = [text + "\r\n" for text in paragraph]
                 write_file.writelines(paragraph_text)
-            self.logger.info(f"Wrote info for {course} successfully")
+            logger.info(f"Wrote info for {course} successfully")
 
     def save_files(self) -> None:
         for course, links in self.files.items():
@@ -216,17 +219,17 @@ class Downloader:
         params_are_valid: bool = current_path and name and link
 
         if params_are_valid:
-            self.logger.info(f"Attempting parallel download of {name}")
+            logger.info(f"Attempting parallel download of {name}")
             try:
                 request = self.session.get(link, headers=dict(referer=link))
                 with open(current_path + "/" + name, "wb") as write_file:
                     write_file.write(request.content)
             except Exception as e:
-                self.logger.error(f"File with same name is open | {str(e)}")
+                logger.error(f"File with same name is open | {str(e)}")
         else:
-            self.logger.error("Some parameters were missing for parallel downloads")
+            logger.error("Some parameters were missing for parallel downloads")
 
     def clean_up_threads(self) -> None:
         for thread in self.threads_list:
-            self.logger.debug(f"Joining downloading threads: {thread.getName()}")
+            logger.debug(f"Joining downloading threads: {thread.getName()}")
             thread.join()
