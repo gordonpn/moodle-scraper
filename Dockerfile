@@ -47,15 +47,12 @@ RUN pip install -r /tmp/requirements.txt
 WORKDIR /home/appuser
 USER appuser
 
-RUN whoami
-RUN echo $0
-RUN pwd
-RUN ls
-
 RUN mkdir -p ./courses
 
 COPY . .
 
+RUN ls
+
 VOLUME ["/home/appuser/courses"]
 
-CMD ["python", "./moodle_scraper.py --automated --convert"]
+CMD ["python", "/home/appuser/moodle_scraper.py --automated --convert"]
