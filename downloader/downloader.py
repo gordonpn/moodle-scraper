@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import sys
 import threading
 from typing import Dict, List
@@ -19,8 +20,8 @@ logger = logging.getLogger(__name__)
 
 class Downloader:
     def __init__(self, username, password, directory):
-        self.username = os.getenv("USERNAME", username)
-        self.password = os.getenv("PASSWORD", password)
+        self.username = os.getenv("MOODLE_USERNAME", username)
+        self.password = os.getenv("MOODLE_PASSWORD", password)
         self.directory = directory
         self.config: Config = Config()
         self.threads_list: List[threading.Thread] = []
@@ -48,6 +49,12 @@ class Downloader:
         self.clean_up_threads()
 
     def get_session(self) -> requests.Session:
+        if not (self.username and self.password):
+            raise ValueError(
+                "Username and password must be specified in environment variables or passed as arguments on the "
+                "command line "
+            )
+
         session_requests = requests.session()
         login_url: str = self.moodle_url + "login/index.php"
         try:
@@ -61,8 +68,8 @@ class Downloader:
 
         auth_data: Dict[str, str] = {
             "logintoken": authenticity_token,
-            "username": self.config.username,
-            "password": self.config.password,
+            "username": self.username,
+            "password": self.password,
         }
 
         logger.info("Attempting to authenticate...")
@@ -165,12 +172,20 @@ class Downloader:
         return files_dict
 
     def create_saving_directory(self) -> None:
-        path: str = self.config.user_path + "/courses"
+        path: str = self.directory
+
+        if not self.directory:
+            logger.debug(
+                "Saving directory not specified, using current working directory"
+            )
+            path = f"{os.getcwd()}/courses"
+            logger.debug(path)
+
         course_paths: List[str] = []
 
         if not os.path.exists(path):
             try:
-                os.mkdir(path)
+                pathlib.Path(path).mkdir(parents=True, exist_ok=True)
             except OSError:
                 logger.error(f"Creation of the directory {path} failed")
             else:

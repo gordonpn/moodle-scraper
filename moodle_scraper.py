@@ -46,6 +46,10 @@ def arguments_parser() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def job():
+    pass
+
+
 if __name__ == "__main__":
     args: argparse.Namespace = arguments_parser()
     downloader = Downloader(args.username, args.password, args.directory)

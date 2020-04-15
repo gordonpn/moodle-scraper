@@ -2,14 +2,13 @@ version: "3.7"
 
 services:
   moodle-scraper:
-    container_name: moodle-scraper-dev
+    container_name: moodle-scraper
     build:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
-    volumes:
-      - ${MOODLE_DIRECTORY}:
     environment:
+      - DEV=True
       - MOODLE_USERNAME
       - MOODLE_PASSWORD
       - UID=1000
