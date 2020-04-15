@@ -36,7 +36,9 @@ ENV PATH="${PYENV_ROOT}/bin:${PATH}"
 
 RUN pyenv install 3.8.2
 
-RUN pyenv global 3.8.2
+RUN pyenv versions
+
+RUN pyenv local 3.8.2
 
 RUN python --version
 
