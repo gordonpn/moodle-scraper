@@ -4,8 +4,20 @@ type: docker
 name: run development version
 
 steps:
+  - name: slack
+    image: plugins/slack
+    settings:
+      channel: drone-ci
+      template: >
+        {{build.event}} on branch {{build.branch}} from repo {{repo.name}}
+        {{build.number}} started!
+        {{build.link}}
+      webhook:
+        from_secret: SLACK_WEBHOOK_URL
   - name: run dev
     image: docker/compose:1.25.5
+    when:
+      branch: develop
     environment:
       MOODLE_PASSWORD:
         from_secret: MOODLE_PASSWORD
@@ -16,12 +28,28 @@ steps:
         path: /var/run/docker.sock
     commands:
       - docker-compose -f /drone/src/docker-compose.dev.yml up --detach --build
+  - name: run master
+    image: docker/compose:1.25.5
+    when:
+      branch: master
+    environment:
+      MOODLE_PASSWORD:
+        from_secret: MOODLE_PASSWORD
+      MOODLE_USERNAME:
+        from_secret: MOODLE_USERNAME
+      MOODLE_DIRECTORY:
+        from_secret: MOODLE_DIRECTORY
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - docker-compose -f /drone/src/docker-compose.yml up --detach --build
   - name: slack
     image: plugins/slack
     settings:
       channel: drone-ci
       template: >
-        {{build.event}} on {{build.branch}}:
+        {{repo.name}}:
         {{#success build.status}}
         build {{build.number}} succeeded!
         {{else}}
@@ -38,5 +66,4 @@ volumes:
       path: /var/run/docker.sock
 
 trigger:
-  branch: develop
   event: push
