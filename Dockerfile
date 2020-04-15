@@ -16,6 +16,10 @@ RUN useradd -rm -d /home/appuser -s /bin/bash -u 1000 appuser
 WORKDIR /home/appuser
 USER appuser
 
+RUN mkdir -p courses
+
 COPY . .
 
-CMD ["python3.8"]
+VOLUME ["/home/appuser/courses"]
+
+CMD ["python3.8", "./moodle_scraper.py --automated --convert"]

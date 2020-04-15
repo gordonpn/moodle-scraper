@@ -8,8 +8,8 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      - MOODLE_USERNAME
-      - MOODLE_PASSWORD
-      - UID=1000
       - GID=1000
+      - MOODLE_PASSWORD
+      - MOODLE_USERNAME
       - TZ
+      - UID=1000
