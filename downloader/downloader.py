@@ -3,13 +3,11 @@ import os
 import pathlib
 import sys
 import threading
+from logging.config import fileConfig
 from typing import Dict, List
 
 import requests
 from bs4 import BeautifulSoup
-from requests import session
-from logging.config import fileConfig
-
 from requests.adapters import HTTPAdapter
 
 from configuration.config import Config

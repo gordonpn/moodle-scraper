@@ -1,9 +1,8 @@
-import os
+import logging
 import sys
 from configparser import ConfigParser
-from typing import List
 from logging.config import fileConfig
-import logging
+from typing import List
 
 logging.config.fileConfig("logging.ini")
 logger = logging.getLogger(__name__)

@@ -8,7 +8,6 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      - DEV=True
       - MOODLE_USERNAME
       - MOODLE_PASSWORD
       - UID=1000
