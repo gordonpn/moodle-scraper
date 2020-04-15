@@ -36,10 +36,10 @@ ENV PATH="${PYENV_ROOT}/bin:${PATH}"
 
 RUN pyenv install 3.8.2
 
-RUN python -m pip install --upgrade pip setuptools wheel
+RUN pip install --upgrade pip setuptools wheel
 
 COPY requirements.txt /tmp/
-RUN python -m pip install -r /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
 
 RUN useradd -rm -d /home/appuser -s /bin/bash -u 1000 appuser
 WORKDIR /home/appuser
