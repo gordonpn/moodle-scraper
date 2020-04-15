@@ -36,13 +36,11 @@ ENV PATH="${PYENV_ROOT}/bin:${PATH}"
 
 RUN pyenv install 3.8.2
 
-RUN pyenv versions
-
-RUN pyenv local 3.8.2
+RUN pyenv shell 3.8.2
 
 RUN python --version
 
-RUN pip3 install --upgrade pip
+RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools wheel
 
 COPY requirements.txt /tmp/
