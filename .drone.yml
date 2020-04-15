@@ -4,7 +4,7 @@ type: docker
 name: run development version
 
 steps:
-  - name: slack
+  - name: slack before
     image: plugins/slack
     settings:
       channel: drone-ci
@@ -44,7 +44,7 @@ steps:
         path: /var/run/docker.sock
     commands:
       - docker-compose -f /drone/src/docker-compose.yml up --detach --build
-  - name: slack
+  - name: slack after
     image: plugins/slack
     settings:
       channel: drone-ci
