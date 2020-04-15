@@ -79,4 +79,5 @@ if __name__ == "__main__":
     args: argparse.Namespace = arguments_parser()
     if args.automated:
         run_schedule()
-    job()
+    else:
+        job()

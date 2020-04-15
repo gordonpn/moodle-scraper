@@ -4,7 +4,7 @@ from configparser import ConfigParser
 from logging.config import fileConfig
 from typing import List
 
-logging.config.fileConfig("logging.ini")
+logging.config.fileConfig("../logging.ini")
 logger = logging.getLogger(__name__)
 
 

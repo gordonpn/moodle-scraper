@@ -6,7 +6,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    restart: unless-stopped
     environment:
       - GID=1000
       - MOODLE_PASSWORD

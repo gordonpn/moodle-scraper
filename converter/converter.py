@@ -6,7 +6,7 @@ from logging.config import fileConfig
 from subprocess import PIPE, STDOUT
 from typing import List
 
-logging.config.fileConfig("logging.ini")
+logging.config.fileConfig("../logging.ini")
 logger = logging.getLogger(__name__)
 
 
@@ -17,7 +17,7 @@ class PDFConverter:
 
     def run(self):
         self.convert_to_pdf()
-        self.clean_duplicates()
+        # self.clean_duplicates()
 
     def convert_to_pdf(self) -> None:
         path: str = self.directory

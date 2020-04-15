@@ -12,7 +12,7 @@ from requests.adapters import HTTPAdapter
 
 from configuration.config import Config
 
-logging.config.fileConfig("logging.ini")
+logging.config.fileConfig("../logging.ini")
 logger = logging.getLogger(__name__)
 
 
