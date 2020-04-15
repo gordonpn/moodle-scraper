@@ -38,7 +38,10 @@ RUN pyenv install 3.8.2
 
 RUN pyenv global 3.8.2
 
-RUN pip install --upgrade pip setuptools wheel
+RUN python --version
+
+RUN pip3 install --upgrade pip
+RUN pip install --upgrade setuptools wheel
 
 COPY requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt
