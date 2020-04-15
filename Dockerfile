@@ -30,13 +30,11 @@ RUN dpkg-reconfigure --frontend noninteractive tzdata
 RUN git clone https://github.com/pyenv/pyenv.git /home/appuser/.pyenv
 
 ENV PYENV_ROOT="/home/appuser/.pyenv"
-ENV PATH="${PYENV_ROOT}/bin:${PATH}"
-
-#RUN /bin/bash -c source /home/appuser/.profile
+ENV PATH="${PYENV_ROOT}/bin:${PYENV_ROOT}/shims:${PATH}"
 
 RUN pyenv install 3.8.2
 
-RUN pyenv shell 3.8.2
+RUN pyenv global 3.8.2
 
 RUN python --version
 
