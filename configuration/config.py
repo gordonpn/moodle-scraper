@@ -5,7 +5,7 @@ from configparser import ConfigParser
 from logging.config import fileConfig
 from typing import List
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("root")
 
 
 class Config:

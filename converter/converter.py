@@ -7,7 +7,7 @@ from subprocess import PIPE, STDOUT
 from os import path
 from typing import List
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("root")
 
 
 class PDFConverter:

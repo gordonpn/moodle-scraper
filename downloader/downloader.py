@@ -13,7 +13,7 @@ from requests.adapters import HTTPAdapter
 
 from configuration.config import Config
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("root")
 
 
 class Downloader:

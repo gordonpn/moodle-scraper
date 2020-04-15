@@ -8,8 +8,8 @@ import schedule
 from converter.converter import PDFConverter
 from downloader.downloader import Downloader
 
-logging.config.fileConfig("logging.ini")
-logger = logging.getLogger(__name__)
+logging.config.fileConfig("logging.ini", disable_existing_loggers=False)
+logger = logging.getLogger("root")
 
 
 def arguments_parser() -> argparse.Namespace:
