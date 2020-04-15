@@ -27,7 +27,7 @@ RUN apt install -y \
 RUN ln -fs /usr/share/zoneinfo/America/Montreal /etc/localtime
 RUN dpkg-reconfigure --frontend noninteractive tzdata
 
-RUN useradd -rm -d /home/appuser -s /bin/bash -u 1000 appuser
+RUN useradd -d /home/appuser -rms /bin/bash -u 1000 appuser
 
 RUN git clone https://github.com/pyenv/pyenv.git /home/appuser/.pyenv
 
@@ -51,8 +51,8 @@ RUN mkdir -p ./courses
 
 COPY . .
 
-RUN ls
+RUN pwd
 
 VOLUME ["/home/appuser/courses"]
 
-CMD ["python", "/home/appuser/moodle_scraper.py --automated --convert"]
+CMD ["python", "./moodle_scraper.py", "--automated", "--convert"]
