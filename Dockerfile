@@ -29,10 +29,10 @@ RUN dpkg-reconfigure --frontend noninteractive tzdata
 
 RUN git clone https://github.com/pyenv/pyenv.git /home/appuser/.pyenv
 
-RUN echo 'export PYENV_ROOT="/home/appuser/.pyenv"' >> /home/appuser/.profile
-RUN echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> /home/appuser/.profile
+ENV PYENV_ROOT="/home/appuser/.pyenv"
+ENV PATH="${PYENV_ROOT}/bin:${PATH}"
 
-RUN /bin/bash -c source /home/appuser/.profile
+#RUN /bin/bash -c source /home/appuser/.profile
 
 RUN pyenv install 3.8.2
 
