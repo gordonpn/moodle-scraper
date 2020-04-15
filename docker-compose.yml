@@ -13,5 +13,5 @@ services:
       - GID=1000
       - MOODLE_PASSWORD
       - MOODLE_USERNAME
-      - TZ=America/Montreal
+      - TZ
       - UID=1000
