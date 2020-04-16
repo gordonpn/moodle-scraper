@@ -41,6 +41,8 @@ steps:
         from_secret: MOODLE_USERNAME
       MOODLE_DIRECTORY:
         from_secret: MOODLE_DIRECTORY
+      SLACK_NOTIFIER_HOOK:
+        from_secret: SLACK_NOTIFIER_HOOK
     volumes:
       - name: dockersock
         path: /var/run/docker.sock

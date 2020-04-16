@@ -7,9 +7,11 @@ import schedule
 
 from converter.converter import PDFConverter
 from downloader.downloader import Downloader
+from notifier.notifier import Notifier
 
 logging.config.fileConfig("logging.ini", disable_existing_loggers=False)
 logger = logging.getLogger("moodle_scraper")
+notifier: Notifier = Notifier()
 
 
 def arguments_parser() -> argparse.Namespace:
@@ -56,6 +58,8 @@ def arguments_parser() -> argparse.Namespace:
 
 def job():
     logger.debug("Starting up job")
+    notifier.notify("Started job")
+    start_time = time.process_time()
     downloader = Downloader(args.username, args.password, args.directory)
     downloader.run()
 
@@ -63,7 +67,9 @@ def job():
         converter = PDFConverter(args.directory)
         converter.run()
 
-    logger.debug("Job completed")
+    run_time = time.process_time() - start_time
+    notifier.notify(f"Job completed. Total run time: {run_time}")
+    logger.debug(f"Job completed. Total run time: {run_time}")
 
 
 def run_schedule():

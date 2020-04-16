@@ -13,5 +13,6 @@ services:
       - GID=1000
       - MOODLE_PASSWORD
       - MOODLE_USERNAME
+      - SLACK_NOTIFIER_HOOK
       - TZ=America/Montreal
       - UID=1000
