@@ -9,7 +9,7 @@ from converter.converter import PDFConverter
 from downloader.downloader import Downloader
 
 logging.config.fileConfig("logging.ini", disable_existing_loggers=False)
-logger = logging.getLogger("root")
+logger = logging.getLogger("moodle_scraper")
 
 
 def arguments_parser() -> argparse.Namespace:

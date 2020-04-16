@@ -1,11 +1,8 @@
 import logging
-from os import path
-import sys
 from configparser import ConfigParser
-from logging.config import fileConfig
 from typing import List
 
-logger = logging.getLogger("root")
+logger = logging.getLogger("moodle_scraper")
 
 
 class Config:
@@ -23,7 +20,7 @@ class Config:
 
         except Exception as e:
             logger.error(f"Error with config file format | {str(e)}")
-            sys.exit(-1)
+            raise SyntaxError
 
     def _get_exclusions(self, config_parser: ConfigParser) -> List[str]:
         exclusions: List[str] = []

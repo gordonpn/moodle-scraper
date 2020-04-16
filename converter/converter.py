@@ -2,12 +2,10 @@ import logging
 import os
 import subprocess
 import time
-from logging.config import fileConfig
 from subprocess import PIPE, STDOUT
-from os import path
 from typing import List
 
-logger = logging.getLogger("root")
+logger = logging.getLogger("moodle_scraper")
 
 
 class PDFConverter:
@@ -22,7 +20,7 @@ class PDFConverter:
     def convert_to_pdf(self) -> None:
         path: str = self.directory
 
-        if not self.directory:
+        if not path:
             logger.debug(
                 "Saving directory not specified, using current working directory"
             )

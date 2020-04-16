@@ -1,10 +1,8 @@
 import logging
 import os
-from os import path
 import pathlib
 import sys
 import threading
-from logging.config import fileConfig
 from typing import Dict, List
 
 import requests
@@ -13,7 +11,7 @@ from requests.adapters import HTTPAdapter
 
 from configuration.config import Config
 
-logger = logging.getLogger("root")
+logger = logging.getLogger("moodle_scraper")
 
 
 class Downloader:
@@ -59,7 +57,7 @@ class Downloader:
             result = session_requests.get(login_url)
         except Exception as e:
             logger.error(f"Could not connect to Moodle, it could be down | {str(e)}")
-            sys.exit()
+            raise ConnectionError
 
         soup = BeautifulSoup(result.text, "html.parser")
         authenticity_token = soup.find("input", {"name": "logintoken"})["value"]
@@ -84,7 +82,7 @@ class Downloader:
             logger.info("Authentication successful")
         else:
             logger.info("Authentication unsuccessful, exiting...")
-            sys.exit(-1)
+            raise ConnectionRefusedError
 
         return session_requests
 
@@ -106,7 +104,7 @@ class Downloader:
 
         if not bool(courses_dict):
             logger.error("Could not find any courses, exiting...")
-            sys.exit()
+            sys.exit(0)
         else:
             logger.info(f"Found {len(courses_dict)} courses successfully:")
             for course in courses_dict:
@@ -186,6 +184,7 @@ class Downloader:
                 pathlib.Path(path).mkdir(parents=True, exist_ok=True)
             except OSError:
                 logger.error(f"Creation of the directory {path} failed")
+                raise OSError
             else:
                 logger.info(f"Successfully created the directory {path} ")
         else:
@@ -199,6 +198,7 @@ class Downloader:
                     os.mkdir(course_path)
                 except OSError:
                     logger.error(f"Creation of the directory {course_path} failed")
+                    raise OSError
                 else:
                     logger.info(f"Successfully created the directory {course_path}")
             else:
