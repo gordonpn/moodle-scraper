@@ -1,7 +1,7 @@
 version: "3.7"
 
 services:
-  moodle-scraper:
+  moodle-scraper-dev:
     container_name: moodle-scraper-dev
     build:
       context: .
@@ -10,5 +10,5 @@ services:
       - GID=1000
       - MOODLE_PASSWORD
       - MOODLE_USERNAME
-      - TZ
+      - TZ=America/Montreal
       - UID=1000
