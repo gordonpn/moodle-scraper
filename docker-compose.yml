@@ -6,9 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    restart: unless-stopped
-    volumes:
-      - ${MOODLE_DIRECTORY}:/home/appuser/courses
+    command: ["--automated", "--convert"]
     environment:
       - GID=1000
       - MOODLE_PASSWORD
@@ -16,3 +14,6 @@ services:
       - SLACK_NOTIFIER_HOOK
       - TZ=America/Montreal
       - UID=1000
+    volumes:
+      - ${MOODLE_DIRECTORY}:/home/appuser/courses
+    restart: unless-stopped

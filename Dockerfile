@@ -47,10 +47,10 @@ RUN pip install -r /tmp/requirements.txt
 WORKDIR /home/appuser
 USER appuser
 
-RUN mkdir --mode=777 --verbose ./courses
+RUN mkdir --verbose ./courses
 
 COPY . .
 
 VOLUME ["/home/appuser/courses"]
 
-CMD ["python", "./moodle_scraper.py", "--automated", "--convert"]
+ENTRYPOINT ["python", "./moodle_scraper.py"]
