@@ -12,3 +12,4 @@ services:
       - MOODLE_USERNAME
       - TZ=America/Montreal
       - UID=1000
+      - DEV_RUN
