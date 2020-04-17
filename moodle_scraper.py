@@ -74,8 +74,9 @@ def job():
         )
     end_time = time.time()
     run_time = end_time - start_time
-    notifier.notify(f"Job completed. Total run time: {run_time}")
-    logger.debug(f"Job completed. Total run time: {run_time}")
+    msg: str = f"Job completed. Total run time: {int(run_time)} seconds"
+    notifier.notify(msg)
+    logger.debug(msg)
 
 
 def run_schedule():
