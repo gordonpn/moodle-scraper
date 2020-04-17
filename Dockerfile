@@ -45,6 +45,7 @@ COPY requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt
 
 RUN mkdir --verbose /home/appuser/courses
+RUN chown appuser /home/appuser
 RUN chown appuser /home/appuser/courses
 
 WORKDIR /home/appuser
