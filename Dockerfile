@@ -1,45 +1,14 @@
-FROM ubuntu:eoan
+FROM python:3.8-alpine
 
-ENV DEBIAN_FRONTEND=noninteractive
+RUN adduser --shell /bin/bash --uid 1000 --system --home /home/appuser --disabled-password appuser
 
-RUN apt update && apt upgrade -y
-RUN apt install -y \
-  build-essential \
-  curl \
-  git \
-  libbz2-dev \
-  libffi-dev \
-  liblzma-dev \
-  libncurses5-dev \
-  libncursesw5-dev \
-  libreadline-dev \
+RUN apk --no-cache add \
   libreoffice \
-  libsqlite3-dev \
-  libssl-dev \
-  llvm \
-  make \
-  python-openssl \
-  tk-dev \
-  wget \
-  xz-utils \
-  zlib1g-dev
+  libreoffice-base \
+  libreoffice-lang-en_us
 
-RUN ln -fs /usr/share/zoneinfo/America/Montreal /etc/localtime
-RUN dpkg-reconfigure --frontend noninteractive tzdata
-
-RUN useradd --home-dir /home/appuser --system --shell /bin/bash --uid 1000 appuser
-
-RUN git clone https://github.com/pyenv/pyenv.git /home/appuser/.pyenv
-
-ENV PYENV_ROOT="/home/appuser/.pyenv"
-ENV PATH="${PYENV_ROOT}/bin:${PYENV_ROOT}/shims:${PATH}"
-
-RUN pyenv install 3.8.2
-
-RUN pyenv global 3.8.2
-
-RUN pip install --upgrade pip
-RUN pip install --upgrade setuptools wheel
+RUN apk --no-cache add --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community \
+  openjdk11
 
 COPY requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt
