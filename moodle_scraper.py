@@ -59,15 +59,20 @@ def arguments_parser() -> argparse.Namespace:
 def job():
     logger.debug("Starting up job")
     notifier.notify("Started job")
-    start_time = time.process_time()
-    downloader = Downloader(args.username, args.password, args.directory)
-    downloader.run()
+    try:
+        start_time = time.process_time()
+        downloader = Downloader(args.username, args.password, args.directory)
+        downloader.run()
 
-    if args.convert:
-        converter = PDFConverter(args.directory)
-        converter.run()
+        if args.convert:
+            converter = PDFConverter(args.directory)
+            converter.run()
 
-    run_time = time.process_time() - start_time
+        run_time = time.process_time() - start_time
+    except Exception:
+        notifier.notify(
+            "Something went wrong during job execution\nCheck the logs on the server"
+        )
     notifier.notify(f"Job completed. Total run time: {run_time}")
     logger.debug(f"Job completed. Total run time: {run_time}")
 

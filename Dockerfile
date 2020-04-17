@@ -27,7 +27,7 @@ RUN apt install -y \
 RUN ln -fs /usr/share/zoneinfo/America/Montreal /etc/localtime
 RUN dpkg-reconfigure --frontend noninteractive tzdata
 
-RUN useradd -d /home/appuser -rms /bin/bash -u 1000 appuser
+RUN useradd --home-dir /home/appuser --system --shell /bin/bash --uid 1000 appuser
 
 RUN git clone https://github.com/pyenv/pyenv.git /home/appuser/.pyenv
 
@@ -47,7 +47,7 @@ RUN pip install -r /tmp/requirements.txt
 WORKDIR /home/appuser
 USER appuser
 
-RUN mkdir -p ./courses
+RUN mkdir --mode=777 --verbose ./courses
 
 COPY . .
 

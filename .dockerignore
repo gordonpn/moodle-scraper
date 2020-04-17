@@ -2,6 +2,6 @@
 .drone.yml
 .gitignore
 docker-compose*
-Dockerfile
+Dockerfile*
 LICENSE
 README.md

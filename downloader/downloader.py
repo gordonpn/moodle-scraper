@@ -56,7 +56,8 @@ class Downloader:
         try:
             result = session_requests.get(login_url)
         except Exception as e:
-            logger.error(f"Could not connect to Moodle, it could be down | {str(e)}")
+            logger.error(str(e))
+            logger.error("Could not connect to Moodle, it could be down")
             raise ConnectionError
 
         soup = BeautifulSoup(result.text, "html.parser")
@@ -182,7 +183,8 @@ class Downloader:
         if not os.path.exists(path):
             try:
                 pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-            except OSError:
+            except OSError as e:
+                logger.error(str(e))
                 logger.error(f"Creation of the directory {path} failed")
                 raise OSError
             else:
@@ -196,7 +198,8 @@ class Downloader:
             if not os.path.exists(course_path):
                 try:
                     os.mkdir(course_path)
-                except OSError:
+                except OSError as e:
+                    logger.error(str(e))
                     logger.error(f"Creation of the directory {course_path} failed")
                     raise OSError
                 else:
