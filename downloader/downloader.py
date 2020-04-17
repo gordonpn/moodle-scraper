@@ -197,7 +197,7 @@ class Downloader:
             course_paths.append(course_path)
             if not os.path.exists(course_path):
                 try:
-                    os.mkdir(course_path)
+                    pathlib.Path(course_path).mkdir(parents=True, exist_ok=True)
                 except OSError as e:
                     logger.error(str(e))
                     logger.error(f"Creation of the directory {course_path} failed")

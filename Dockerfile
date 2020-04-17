@@ -44,10 +44,11 @@ RUN pip install --upgrade setuptools wheel
 COPY requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt
 
+RUN mkdir --verbose /home/appuser/courses
+RUN chown appuser /home/appuser/courses
+
 WORKDIR /home/appuser
 USER appuser
-
-RUN mkdir --verbose ./courses
 
 COPY . .
 
