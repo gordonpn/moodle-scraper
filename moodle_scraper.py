@@ -59,7 +59,7 @@ def arguments_parser() -> argparse.Namespace:
 def job():
     logger.debug("Starting up job")
     notifier.notify("Started job")
-    start_time = time.process_time()
+    start_time = time.time()
     try:
         downloader = Downloader(args.username, args.password, args.directory)
         downloader.run()
@@ -72,7 +72,8 @@ def job():
         notifier.notify(
             "Something went wrong during job execution\nCheck the logs on the server"
         )
-    run_time = time.process_time() - start_time
+    end_time = time.time()
+    run_time = end_time - start_time
     notifier.notify(f"Job completed. Total run time: {run_time}")
     logger.debug(f"Job completed. Total run time: {run_time}")
 
