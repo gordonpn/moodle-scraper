@@ -21,6 +21,7 @@ steps:
     when:
       branch: develop
     environment:
+      DEV_RUN: true
       MOODLE_PASSWORD:
         from_secret: MOODLE_PASSWORD
       MOODLE_USERNAME:

@@ -13,6 +13,8 @@ class Notifier:
         self.hook = os.getenv("SLACK_NOTIFIER_HOOK")
 
     def notify(self, msg: str) -> None:
+        if str(os.getenv("DEV_RUN")).lower() == "true":
+            return
         wrapped_msg: str = f"moodle-scraper project:\n{msg}"
         slack_data: Dict[str, str] = {"text": wrapped_msg}
 
