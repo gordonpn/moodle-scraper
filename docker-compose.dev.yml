@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["--convert"]
+    command: ["python", "./moodle_scraper.py", "--convert"]
     environment:
       - GID=1000
       - MOODLE_PASSWORD

@@ -54,4 +54,4 @@ COPY . .
 
 VOLUME ["/home/appuser/courses"]
 
-ENTRYPOINT ["python", "./moodle_scraper.py"]
+CMD ["python", "./moodle_scraper.py"]
