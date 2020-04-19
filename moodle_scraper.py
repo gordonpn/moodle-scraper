@@ -1,12 +1,14 @@
 import argparse
 import logging
 import time
+from contextlib import ContextDecorator
 from logging.config import fileConfig
 
 import schedule
 
 from converter.converter import PDFConverter
 from downloader.downloader import Downloader
+from healthcheck.healthcheck import HealthCheck
 from notifier.notifier import Notifier
 
 logging.config.fileConfig("logging.ini", disable_existing_loggers=False)
@@ -56,10 +58,26 @@ def arguments_parser() -> argparse.Namespace:
     return parser.parse_args()
 
 
+class Timer(ContextDecorator):
+    def __enter__(self):
+        msg: str = "Started job"
+        logger.debug(msg)
+        notifier.notify(msg)
+        HealthCheck.start()
+        self.start_time = time.time()
+        return self
+
+    def __exit__(self, type_, value, traceback):
+        end_time = time.time()
+        run_time = end_time - self.start_time
+        msg: str = f"Job completed. Total run time: {int(run_time)} seconds"
+        HealthCheck.success()
+        notifier.notify(msg)
+        logger.debug(msg)
+
+
+@Timer()
 def job():
-    logger.debug("Starting up job")
-    notifier.notify("Started job")
-    start_time = time.time()
     try:
         downloader = Downloader(args.username, args.password, args.directory)
         downloader.run()
@@ -69,14 +87,10 @@ def job():
             converter.run()
 
     except Exception:
+        HealthCheck.fail()
         notifier.notify(
             "Something went wrong during job execution\nCheck the logs on the server"
         )
-    end_time = time.time()
-    run_time = end_time - start_time
-    msg: str = f"Job completed. Total run time: {int(run_time)} seconds"
-    notifier.notify(msg)
-    logger.debug(msg)
 
 
 def run_schedule():

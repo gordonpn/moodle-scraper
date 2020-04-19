@@ -8,9 +8,9 @@ services:
       dockerfile: Dockerfile
     command: ["python", "./moodle_scraper.py", "--convert"]
     environment:
+      - DEV_RUN
       - GID=1000
       - MOODLE_PASSWORD
       - MOODLE_USERNAME
       - TZ=America/Montreal
       - UID=1000
-      - DEV_RUN

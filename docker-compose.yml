@@ -9,6 +9,7 @@ services:
     command: ["python", "./moodle_scraper.py", "--automated", "--convert"]
     environment:
       - GID=1000
+      - HC_UUID
       - MOODLE_PASSWORD
       - MOODLE_USERNAME
       - SLACK_NOTIFIER_HOOK
