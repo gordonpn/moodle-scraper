@@ -95,7 +95,7 @@ def job():
 
 def run_schedule():
     logger.debug("Setting schedule")
-    schedule.every(12).hours.do(job)
+    schedule.every(6).hours.do(job)
 
     while True:
         schedule.run_pending()

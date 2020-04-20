@@ -7,6 +7,7 @@ This project started because of an annoyance I had with having to check the Mood
 ---
 ![GitHub](https://img.shields.io/github/license/gpnn/moodle-scraper)
 [![Build Status](https://drone.gordon-pn.com/api/badges/gordonpn/moodle-scraper/status.svg)](https://drone.gordon-pn.com/gordonpn/moodle-scraper)
+![Healthchecks.io](https://healthchecks.io/badge/ca24ff5d-8821-4d86-8a5a-dc92cf/kCadkBM0.shields)
 
 ![GitHub top language](https://img.shields.io/github/languages/top/gpnn/moodle-scraper)
 ![GitHub language count](https://img.shields.io/github/languages/count/gpnn/moodle-scraper)
