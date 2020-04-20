@@ -42,5 +42,5 @@ class PDFConverter:
     def kill_processes(self):
         logger.debug("Cleaning up processes")
         for process in self.processes_to_kill:
-            logger.debug(f"Killing {process.pid}")
+            logger.debug(f"Killing {process.pid=}")
             process.kill()
