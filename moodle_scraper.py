@@ -91,6 +91,7 @@ def job():
         notifier.notify(
             "Something went wrong during job execution\nCheck the logs on the server"
         )
+        raise Exception
 
 
 def run_schedule():
