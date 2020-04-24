@@ -16,6 +16,7 @@ class PDFConverter:
 
     def run(self):
         self.convert_to_pdf()
+        self.join_threads()
         self.kill_processes()
 
     def convert_to_pdf(self) -> None:
