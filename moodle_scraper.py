@@ -8,7 +8,7 @@ import schedule
 
 from converter.converter import PDFConverter
 from downloader.downloader import Downloader
-from healthcheck.healthcheck import HealthCheck
+from healthcheck.healthcheck import HealthCheck, Status
 from notifier.notifier import Notifier
 
 logging.config.fileConfig("logging.ini", disable_existing_loggers=False)
@@ -63,7 +63,7 @@ class Timer(ContextDecorator):
         msg: str = "Started job"
         logger.debug(msg)
         notifier.notify(msg)
-        HealthCheck.start()
+        HealthCheck.ping_status(Status.START)
         self.start_time = time.time()
         return self
 
@@ -71,7 +71,7 @@ class Timer(ContextDecorator):
         end_time = time.time()
         run_time = end_time - self.start_time
         msg: str = f"Job completed. Total run time: {int(run_time)} seconds"
-        HealthCheck.success()
+        HealthCheck.ping_status(Status.SUCCESS)
         notifier.notify(msg)
         logger.debug(msg)
 
@@ -87,7 +87,7 @@ def job():
             converter.run()
 
     except Exception:
-        HealthCheck.fail()
+        HealthCheck.ping_status(Status.FAIL)
         notifier.notify(
             "Something went wrong during job execution\nCheck the logs on the server"
         )

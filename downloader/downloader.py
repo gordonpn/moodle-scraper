@@ -2,7 +2,7 @@ import logging
 import os
 import pathlib
 import sys
-import threading
+from threading import Thread
 from typing import Dict, List
 
 import requests
@@ -20,7 +20,7 @@ class Downloader:
         self.password = os.getenv("MOODLE_PASSWORD", password)
         self.directory = directory
         self.config: Config = Config()
-        self.threads_list: List[threading.Thread] = []
+        self.threads_list: List[Thread] = []
         self.moodle_url: str = "https://moodle.concordia.ca/moodle/"
         self.session = None
         self.courses: Dict[str, str] = {}
@@ -224,7 +224,7 @@ class Downloader:
         for course, links in self.files.items():
             current_path: str = f"{self.save_path}/{course}"
             for name, link in links.items():
-                t = threading.Thread(
+                t = Thread(
                     target=self._parallel_save_files,
                     kwargs={"current_path": current_path, "name": name, "link": link},
                 )

@@ -1,29 +1,25 @@
 import logging
 import os
+from enum import Enum
 
 import requests
 
 logger = logging.getLogger("moodle_scraper")
 
 
+class Status(Enum):
+    SUCCESS = ''
+    START = '/start'
+    FAIL = '/fail'
+
+
 class HealthCheck:
-    @staticmethod
-    def start():
-        if "DEV_RUN" in os.environ:
-            return
-        logger.debug("Sending success health check")
-        requests.get(f"https://hc-ping.com/{os.getenv('HC_UUID')}/start")
+    HC_UUID = "HC_UUID"
 
     @staticmethod
-    def success():
+    def ping_status(status: Status = Status.SUCCESS):
         if "DEV_RUN" in os.environ:
             return
-        logger.debug("Sending success health check")
-        requests.get(f"https://hc-ping.com/{os.getenv('HC_UUID')}")
-
-    @staticmethod
-    def fail():
-        if "DEV_RUN" in os.environ:
-            return
-        logger.debug("Sending failed health check")
-        requests.get(f"https://hc-ping.com/{os.getenv('HC_UUID')}/fail")
+        if HealthCheck.HC_UUID not in os.environ:
+            raise EnvironmentError(f"Missing {HealthCheck.HC_UUID=}")
+        requests.get(f"https://hc-ping.com/{os.getenv(HealthCheck.HC_UUID)}{status.value}")
