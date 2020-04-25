@@ -9,12 +9,12 @@ logger = logging.getLogger("moodle_scraper")
 
 
 class PDFConverter:
-    def __init__(self, directory):
+    def __init__(self, directory: str):
         self.directory = directory
         self.processes_to_kill: List[Popen] = []
         self.threads: List[Thread] = []
 
-    def run(self):
+    def run(self) -> None:
         self.convert_to_pdf()
         self.join_threads()
         self.kill_processes()
@@ -32,8 +32,10 @@ class PDFConverter:
         for root, dirs, files in os.walk(path):
             for file_ in files:
                 if file_.endswith(".ppt"):
-                    t = Thread(target=self._conversion_job,
-                               kwargs={"file_to_convert": file_, "root": root})
+                    t = Thread(
+                        target=self._conversion_job,
+                        kwargs={"file_to_convert": file_, "root": root},
+                    )
                     self.threads.append(t)
                     t.start()
 
