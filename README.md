@@ -6,7 +6,7 @@ This project started because of an annoyance I had with having to check the Mood
 
 ---
 [![Build Status](https://drone.gordon-pn.com/api/badges/gordonpn/moodle-scraper/status.svg)](https://drone.gordon-pn.com/gordonpn/moodle-scraper)
-![Healthchecks.io](https://healthchecks.io/badge/ca24ff5d-8821-4d86-8a5a-dc92cf/kCadkBM0.svg)
+![Healthchecks.io](https://healthchecks.io/badge/603efbcd-b70d-424d-91cc-6560ba83d5eb/Workecps.svg)
 ![Last commit on develop](https://badgen.net/github/last-commit/gordonpn/moodle-scraper/develop)
 ![License](https://badgen.net/github/license/gordonpn/moodle-scraper)
 
