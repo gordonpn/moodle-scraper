@@ -62,7 +62,6 @@ class Timer(ContextDecorator):
     def __enter__(self):
         msg: str = "Started job"
         logger.debug(msg)
-        notifier.notify(msg)
         HealthCheck.ping_status(Status.START)
         self.start_time = time.time()
         return self
@@ -72,7 +71,6 @@ class Timer(ContextDecorator):
         run_time = end_time - self.start_time
         msg: str = f"Job completed. Total run time: {int(run_time)} seconds"
         HealthCheck.ping_status(Status.SUCCESS)
-        notifier.notify(msg)
         logger.debug(msg)
 
 
