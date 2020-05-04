@@ -159,6 +159,8 @@ class Downloader:
                     extension = ".txt"
                 elif "spreadsheet" in file_type:
                     extension = ".xls"
+                elif "document" in file_type:
+                    extension = ".docx"
                 file_name = activity.find("span", {"class": "instancename"}).text
                 file_name = file_name.replace(" File", "").strip() + extension
                 logger.info(f"Found file: {file_name}")
