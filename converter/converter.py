@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+from os import path
 from subprocess import PIPE, STDOUT, Popen
 from threading import Thread
 from typing import List
@@ -20,24 +21,29 @@ class PDFConverter:
         self.kill_processes()
 
     def convert_to_pdf(self) -> None:
-        path: str = self.directory
+        path_: str = self.directory
+        extensions: List[str] = [".ppt", ".docx", ".xls"]
 
-        if not path:
+        if not path_:
             logger.debug(
                 "Saving directory not specified, using current working directory"
             )
-            path = f"{os.getcwd()}/courses"
-            logger.debug(path)
+            path_ = f"{os.getcwd()}/courses"
+            logger.debug(path_)
 
-        for root, dirs, files in os.walk(path):
+        for root, dirs, files in os.walk(path_):
             for file_ in files:
-                if file_.endswith(".ppt"):
-                    t = Thread(
-                        target=self._conversion_job,
-                        kwargs={"file_to_convert": file_, "root": root},
-                    )
-                    self.threads.append(t)
-                    t.start()
+                if file_.endswith(tuple(extensions)):
+                    logger.debug(f"Found {file_}")
+                    filename: str = f"{file_[: file_.rfind('.')]}.pdf"
+                    if not path.exists(f"{root}/{filename}"):
+                        logger.debug(f"{filename} does not exist, will convert.")
+                        t = Thread(
+                            target=self._conversion_job,
+                            kwargs={"file_to_convert": file_, "root": root},
+                        )
+                        self.threads.append(t)
+                        t.start()
 
     def _conversion_job(self, file_to_convert, root) -> None:
         process = subprocess.Popen(
