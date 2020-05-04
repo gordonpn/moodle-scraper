@@ -36,7 +36,9 @@ class PDFConverter:
                 if file_.endswith(tuple(extensions)):
                     logger.debug(f"Found {file_}")
                     filename: str = f"{file_[: file_.rfind('.')]}.pdf"
-                    if not path.exists(f"{root}/{filename}"):
+                    if path.exists(f"{root}/{filename}"):
+                        logger.debug(f"{filename} already exists, skipping conversion")
+                    else:
                         logger.debug(f"{filename} does not exist, will convert.")
                         t = Thread(
                             target=self._conversion_job,

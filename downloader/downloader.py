@@ -2,6 +2,7 @@ import logging
 import os
 import pathlib
 import sys
+from os import path
 from threading import Thread
 from typing import Dict, List
 
@@ -226,12 +227,19 @@ class Downloader:
         for course, links in self.files.items():
             current_path: str = f"{self.save_path}/{course}"
             for name, link in links.items():
-                t = Thread(
-                    target=self._parallel_save_files,
-                    kwargs={"current_path": current_path, "name": name, "link": link},
-                )
-                self.threads_list.append(t)
-                t.start()
+                if path.exists(f"{current_path}/{name}"):
+                    logging.debug(f"{name} already exists, skipping download")
+                else:
+                    t = Thread(
+                        target=self._parallel_save_files,
+                        kwargs={
+                            "current_path": current_path,
+                            "name": name,
+                            "link": link,
+                        },
+                    )
+                    self.threads_list.append(t)
+                    t.start()
 
     def _parallel_save_files(self, current_path=None, name=None, link=None) -> None:
         params_are_valid: bool = current_path and name and link
