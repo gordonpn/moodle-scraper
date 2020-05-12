@@ -25,7 +25,7 @@ If the professor wrote notes on the page, it will also save those notes into a t
 ## Usage
 
 ```
-usage: moodle_scraper.py [-h] [-a] [-d DIRECTORY] [-u USERNAME] [-p PASSWORD] [-c]
+usage: main.py [-h] [-a] [-d DIRECTORY] [-u USERNAME] [-p PASSWORD] [-c]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -52,11 +52,11 @@ If used this way, then you must set some environment variables: `MOODLE_USERNAME
 
 `MOODLE_DIRECTORY` is where you'd like your files to be saved on the host machine.
 
-Then run `docker-compose up --detach` from within the cloned repository.
+Then run `docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --detach` from within the cloned repository.
 
 If you do not want it to be automated, then you can use the `docker-compose.dev.yml` as that one will run once and terminate.
 
-`docker-compose -f docker-compose.dev.yml up --detach`
+`docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --detach`
 
 ### As a script
 
@@ -66,7 +66,7 @@ You need Python3 installed.
 
 ```bash
 pip install -r requirements.txt
-python ./moodle_scraper.py -u bob -p alice
+python ./main.py -u bob -p alice
 ```
 
 ## Configuration
@@ -89,6 +89,12 @@ You may open an issue.
 *  [x] Improve running time by using async or threads
 *  [x] Refactor code for better maintainability
 *  [x] Add command line flags to skip conversion
+
+Check out the [open issues](https://github.com/gordonpn/moodle-scraper/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) for ideas and features I have planned!
+
+## Authors
+
+Myself [@gordonpn](https://github.com/gordonpn)
 
 ## License
 

@@ -1,16 +1,8 @@
-version: "3.7"
+version: "3.8"
 
 services:
-  moodle-scraper-dev:
+  moodle-scraper:
     container_name: moodle-scraper-dev
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: ["python", "./moodle_scraper.py", "--convert"]
+    command: ["python", "./main.py", "--convert"]
     environment:
       - DEV_RUN
-      - GID=1000
-      - MOODLE_PASSWORD
-      - MOODLE_USERNAME
-      - TZ=America/Montreal
-      - UID=1000

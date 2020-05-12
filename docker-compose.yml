@@ -1,20 +1,14 @@
-version: "3.7"
+version: "3.8"
 
 services:
   moodle-scraper:
-    container_name: moodle-scraper
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["python", "./moodle_scraper.py", "--automated", "--convert"]
     environment:
       - GID=1000
       - HC_UUID
       - MOODLE_PASSWORD
       - MOODLE_USERNAME
-      - SLACK_NOTIFIER_HOOK
       - TZ=America/Montreal
       - UID=1000
-    volumes:
-      - ${MOODLE_DIRECTORY}:/home/appuser/courses
-    restart: unless-stopped

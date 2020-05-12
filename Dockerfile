@@ -30,4 +30,4 @@ COPY . .
 
 VOLUME ["/home/appuser/courses"]
 
-CMD ["python", "./moodle_scraper.py"]
+CMD ["python", "./main.py"]

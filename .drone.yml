@@ -84,7 +84,9 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker-compose -f /drone/src/docker-compose.dev.yml up --detach --build
+      - docker container stop moodle-scraper || true
+      - docker container rm moodle-scraper || true
+      - docker-compose -f /drone/src/docker-compose.yml -f /drone/src/docker-compose.dev.yml up --detach --build
 
   - name: deploy prod
     image: docker/compose:1.25.5
@@ -103,7 +105,9 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker-compose -f /drone/src/docker-compose.yml up --detach --build
+      - docker container stop moodle-scraper-dev || true
+      - docker container rm moodle-scraper-dev || true
+      - docker-compose -f /drone/src/docker-compose.yml -f /drone/src/docker-compose.prod.yml up --detach --build
 
   - name: slack after deploy
     image: plugins/slack

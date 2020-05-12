@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  moodle-scraper:
+    container_name: moodle-scraper
+    command: ["python", "./main.py", "--automated", "--convert"]
+    volumes:
+      - ${MOODLE_DIRECTORY}:/home/appuser/courses
+    restart: unless-stopped
