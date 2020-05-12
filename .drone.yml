@@ -1,7 +1,10 @@
 ---
 kind: pipeline
 type: docker
-name: deploy
+name: notification
+
+trigger:
+  event: [ push ]
 
 steps:
   - name: slack before
@@ -16,7 +19,58 @@ steps:
         {{build.link}}
       webhook:
         from_secret: SLACK_WEBHOOK_URL
-  - name: run dev
+
+---
+kind: pipeline
+type: docker
+name: build docker images
+
+trigger:
+  event: [ push ]
+
+steps:
+  - name: build image
+    image: docker
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - docker image build --rm .
+
+  - name: slack after docker image build
+    image: plugins/slack
+    settings:
+      channel: drone-ci
+      template: >
+        {{repo.name}}:
+        {{#success build.status}}
+        docker image build #{{build.number}} succeeded!
+        {{else}}
+        docker image build #{{build.number}} failed!
+        {{/success}}
+      webhook:
+        from_secret: SLACK_WEBHOOK_URL
+    when:
+      status: [ success, failure ]
+
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
+
+---
+kind: pipeline
+type: docker
+name: deploy
+
+trigger:
+  event: push
+  branch:
+    - master
+    - develop
+
+steps:
+  - name: deploy develop
     image: docker/compose:1.25.5
     when:
       branch: develop
@@ -31,7 +85,8 @@ steps:
         path: /var/run/docker.sock
     commands:
       - docker-compose -f /drone/src/docker-compose.dev.yml up --detach --build
-  - name: run master
+
+  - name: deploy prod
     image: docker/compose:1.25.5
     when:
       branch: master
@@ -42,8 +97,6 @@ steps:
         from_secret: MOODLE_USERNAME
       MOODLE_DIRECTORY:
         from_secret: MOODLE_DIRECTORY
-      SLACK_NOTIFIER_HOOK:
-        from_secret: SLACK_NOTIFIER_HOOK
       HC_UUID:
         from_secret: HC_UUID
     volumes:
@@ -51,16 +104,17 @@ steps:
         path: /var/run/docker.sock
     commands:
       - docker-compose -f /drone/src/docker-compose.yml up --detach --build
-  - name: slack after
+
+  - name: slack after deploy
     image: plugins/slack
     settings:
       channel: drone-ci
       template: >
         {{repo.name}}:
         {{#success build.status}}
-        build #{{build.number}} succeeded!
+        deploy #{{build.number}} succeeded!
         {{else}}
-        build #{{build.number}} failed!
+        deploy #{{build.number}} failed!
         {{/success}}
       webhook:
         from_secret: SLACK_WEBHOOK_URL
@@ -72,8 +126,3 @@ volumes:
     host:
       path: /var/run/docker.sock
 
-trigger:
-  event: push
-  branch:
-    - master
-    - develop
