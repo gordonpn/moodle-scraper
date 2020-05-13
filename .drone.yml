@@ -9,6 +9,7 @@ trigger:
 steps:
   - name: slack before
     image: plugins/slack
+    failure: ignore
     settings:
       channel: drone-ci
       template: >
@@ -39,6 +40,7 @@ steps:
 
   - name: slack after docker image build
     image: plugins/slack
+    failure: ignore
     settings:
       channel: drone-ci
       template: >
@@ -111,6 +113,7 @@ steps:
 
   - name: slack after deploy
     image: plugins/slack
+    failure: ignore
     settings:
       channel: drone-ci
       template: >
