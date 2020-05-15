@@ -86,9 +86,6 @@ def job():
 
     except Exception:
         HealthCheck.ping_status(Status.FAIL)
-        notifier.notify(
-            "Something went wrong during job execution\nCheck the logs on the server"
-        )
         raise Exception
 
 
