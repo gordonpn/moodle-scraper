@@ -5,4 +5,4 @@ services:
     container_name: moodle-scraper-dev
     command: ["python", "./main.py", "--convert"]
     environment:
-      - DEV_RUN
+      - DEV_RUN=true

@@ -36,7 +36,7 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker image build --rm .
+      - docker image build .
 
   - name: slack after docker image build
     image: plugins/slack
@@ -63,10 +63,47 @@ volumes:
 ---
 kind: pipeline
 type: docker
+name: security
+
+trigger:
+  event: [ push ]
+
+steps:
+  - name: bandit test
+    image: python:3.8-buster
+    commands:
+      - pip install bandit
+      - bandit -r ./
+  - name: safety check
+    image: python:3.8-buster
+    commands:
+      - pip install safety
+      - safety check
+      - safety check -r requirements.txt
+  - name: slack after test
+    image: plugins/slack
+    failure: ignore
+    settings:
+      channel: drone-ci
+      template: >
+        {{repo.name}}:
+        {{#success build.status}}
+        security scan #{{build.number}} succeeded!
+        {{else}}
+        security scan #{{build.number}} failed!
+        {{/success}}
+      webhook:
+        from_secret: SLACK_WEBHOOK_URL
+    when:
+      status: [ success, failure ]
+
+---
+kind: pipeline
+type: docker
 name: deploy
 
 trigger:
-  event: push
+  event: [ push ]
   branch:
     - master
     - develop
@@ -75,9 +112,8 @@ steps:
   - name: deploy develop
     image: docker/compose:1.25.5
     when:
-      branch: develop
+      branch: [develop]
     environment:
-      DEV_RUN: true
       MOODLE_PASSWORD:
         from_secret: MOODLE_PASSWORD
       MOODLE_USERNAME:
@@ -93,7 +129,7 @@ steps:
   - name: deploy prod
     image: docker/compose:1.25.5
     when:
-      branch: master
+      branch: [master]
     environment:
       MOODLE_PASSWORD:
         from_secret: MOODLE_PASSWORD
