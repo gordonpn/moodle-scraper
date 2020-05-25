@@ -3,6 +3,6 @@ version: "3.8"
 services:
   moodle-scraper:
     container_name: moodle-scraper-dev
-    command: ["python", "./main.py", "--convert"]
+    command: ["python", "./main.py"]
     environment:
       - DEV_RUN=true

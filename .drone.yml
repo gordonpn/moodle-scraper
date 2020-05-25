@@ -73,7 +73,7 @@ steps:
     image: python:3.8-buster
     commands:
       - pip install bandit
-      - bandit -r ./
+      - bandit -r ./ -ll
   - name: safety check
     image: python:3.8-buster
     commands:
@@ -104,32 +104,13 @@ name: deploy
 
 trigger:
   event: [ push ]
-  branch:
-    - master
-    - develop
+  branch: [ master ]
 
 steps:
-  - name: deploy develop
-    image: docker/compose:1.25.5
-    when:
-      branch: [develop]
-    environment:
-      MOODLE_PASSWORD:
-        from_secret: MOODLE_PASSWORD
-      MOODLE_USERNAME:
-        from_secret: MOODLE_USERNAME
-    volumes:
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      - docker container stop moodle-scraper || true
-      - docker container rm moodle-scraper || true
-      - docker-compose -f /drone/src/docker-compose.yml -f /drone/src/docker-compose.dev.yml up --detach --build
-
   - name: deploy prod
     image: docker/compose:1.25.5
     when:
-      branch: [master]
+      branch: [ master ]
     environment:
       MOODLE_PASSWORD:
         from_secret: MOODLE_PASSWORD

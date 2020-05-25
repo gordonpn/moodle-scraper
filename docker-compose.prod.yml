@@ -7,3 +7,6 @@ services:
     volumes:
       - ${MOODLE_DIRECTORY}:/home/appuser/courses
     restart: unless-stopped
+    environment:
+      - GID=1000
+      - UID=1000

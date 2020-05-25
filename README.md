@@ -10,6 +10,8 @@ This project started because of an annoyance I had with having to check the Mood
 ![Last commit on develop](https://badgen.net/github/last-commit/gordonpn/moodle-scraper/develop)
 ![License](https://badgen.net/github/license/gordonpn/moodle-scraper)
 
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/gordonpn)
+
 ## Description
 
 A Moodle scraper written for Concordia's Moodle. It may or may not work for other schools, but that remains untested and I have no intention of trying. Thus, I did not provide a way to configure the moodle website url.
@@ -22,9 +24,13 @@ The program will organize the files per course, into respective directories.
 
 If the professor wrote notes on the page, it will also save those notes into a txt file.
 
+## Demo
+
+[![asciicast](https://asciinema.org/a/frSwrV8ak9aOnSPEAXISTHejL.svg)](https://asciinema.org/a/frSwrV8ak9aOnSPEAXISTHejL)
+
 ## Usage
 
-```
+```sh
 usage: main.py [-h] [-a] [-d DIRECTORY] [-u USERNAME] [-p PASSWORD] [-c]
 
 optional arguments:
@@ -64,7 +70,7 @@ After you have cloned the repository.
 
 You need Python3 installed.
 
-```bash
+```sh
 pip install -r requirements.txt
 python ./main.py -u bob -p alice
 ```
@@ -74,10 +80,11 @@ python ./main.py -u bob -p alice
 The only configuration offered at this time is exclusion of courses.
 
 Inside the `excluded-courses.ini` file, add the course title(s) as they appear on your Moodle dashboard (or part of it):
-````
+
+```
 [moodle-scraper]
 exclusions =
-````
+```
 
 ## Support
 
@@ -85,10 +92,10 @@ You may open an issue.
 
 ## Roadmap
 
-*  [x] Support other possible file types
-*  [x] Improve running time by using async or threads
-*  [x] Refactor code for better maintainability
-*  [x] Add command line flags to skip conversion
+* [x] Support other possible file types
+* [x] Improve running time by using async or threads
+* [x] Refactor code for better maintainability
+* [x] Add command line flags to skip conversion
 
 Check out the [open issues](https://github.com/gordonpn/moodle-scraper/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) for ideas and features I have planned!
 

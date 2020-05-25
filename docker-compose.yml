@@ -7,9 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - GID=1000
       - HC_UUID
       - MOODLE_PASSWORD
       - MOODLE_USERNAME
       - TZ=America/Montreal
-      - UID=1000
