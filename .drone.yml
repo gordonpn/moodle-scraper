@@ -28,6 +28,9 @@ name: build docker images
 
 trigger:
   event: [ push ]
+  branch:
+    exclude:
+      - master
 
 steps:
   - name: build image
@@ -120,6 +123,7 @@ steps:
         from_secret: MOODLE_DIRECTORY
       HC_UUID:
         from_secret: HC_UUID
+      COMPOSE_PROJECT_NAME: moodle-scraper
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
