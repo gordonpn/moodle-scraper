@@ -4,7 +4,7 @@ type: docker
 name: notification
 
 trigger:
-  event: [ push ]
+  event: [ push, pull_request ]
 
 steps:
   - name: slack before
@@ -27,20 +27,19 @@ type: docker
 name: build docker images
 
 trigger:
-  event: [ push ]
+  event: [ push, pull_request ]
   branch:
     exclude:
       - master
 
 steps:
-  - name: build image
-    image: docker
+  - name: build images
+    image: docker/compose:1.25.5
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker image build .
-
+      - docker-compose -f /drone/src/docker-compose.yml -f /drone/src/docker-compose.prod.yml build
   - name: slack after docker image build
     image: plugins/slack
     failure: ignore
@@ -69,7 +68,10 @@ type: docker
 name: security
 
 trigger:
-  event: [ push ]
+  event: [ push, pull_request ]
+  branch:
+    exclude:
+      - master
 
 steps:
   - name: bandit test
