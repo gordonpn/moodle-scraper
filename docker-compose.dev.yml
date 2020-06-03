@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  moodle-scraper:
+  scraper:
     container_name: moodle-scraper-dev
     command: ["python", "./main.py"]
     environment:

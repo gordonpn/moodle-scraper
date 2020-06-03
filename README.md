@@ -90,12 +90,7 @@ exclusions =
 
 You may open an issue.
 
-## Roadmap
-
-* [x] Support other possible file types
-* [x] Improve running time by using async or threads
-* [x] Refactor code for better maintainability
-* [x] Add command line flags to skip conversion
+## Roadmap / Todo
 
 Check out the [open issues](https://github.com/gordonpn/moodle-scraper/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) for ideas and features I have planned!
 

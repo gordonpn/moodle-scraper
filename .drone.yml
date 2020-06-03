@@ -15,7 +15,7 @@ steps:
       template: >
         {{build.event}} on branch {{build.branch}} from repo {{repo.name}}
 
-        build #{{build.number}} started!
+        build #{{build.number}} started
 
         {{build.link}}
       webhook:
@@ -24,7 +24,11 @@ steps:
 ---
 kind: pipeline
 type: docker
-name: build docker images
+name: build and publish docker image
+
+platform:
+  os: linux
+  arch: amd64
 
 trigger:
   event: [ push, pull_request ]
@@ -33,35 +37,23 @@ trigger:
       - master
 
 steps:
-  - name: build images
-    image: docker/compose:1.25.5
+  - name: publish
+    image: docker
+    environment:
+      DOCKER_TOKEN:
+        from_secret: DOCKER_TOKEN
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker-compose -f /drone/src/docker-compose.yml -f /drone/src/docker-compose.prod.yml build
-  - name: slack after docker image build
-    image: plugins/slack
-    failure: ignore
-    settings:
-      channel: drone-ci
-      template: >
-        {{repo.name}}:
-        {{#success build.status}}
-        docker image build #{{build.number}} succeeded!
-        {{else}}
-        docker image build #{{build.number}} failed!
-        {{/success}}
-      webhook:
-        from_secret: SLACK_WEBHOOK_URL
-    when:
-      status: [ success, failure ]
+      - echo $DOCKER_TOKEN | docker login -u gordonpn --password-stdin
+      - docker build -t gordonpn/moodle-scraper:latest .
+      - docker push gordonpn/moodle-scraper:latest
 
 volumes:
   - name: dockersock
     host:
       path: /var/run/docker.sock
-
 ---
 kind: pipeline
 type: docker
@@ -85,22 +77,6 @@ steps:
       - pip install safety
       - safety check
       - safety check -r requirements.txt
-  - name: slack after test
-    image: plugins/slack
-    failure: ignore
-    settings:
-      channel: drone-ci
-      template: >
-        {{repo.name}}:
-        {{#success build.status}}
-        security scan #{{build.number}} succeeded!
-        {{else}}
-        security scan #{{build.number}} failed!
-        {{/success}}
-      webhook:
-        from_secret: SLACK_WEBHOOK_URL
-    when:
-      status: [ success, failure ]
 
 ---
 kind: pipeline
@@ -114,8 +90,6 @@ trigger:
 steps:
   - name: deploy prod
     image: docker/compose:1.25.5
-    when:
-      branch: [ master ]
     environment:
       MOODLE_PASSWORD:
         from_secret: MOODLE_PASSWORD
@@ -125,16 +99,27 @@ steps:
         from_secret: MOODLE_DIRECTORY
       HC_UUID:
         from_secret: HC_UUID
-      COMPOSE_PROJECT_NAME: moodle-scraper
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker container stop moodle-scraper-dev || true
-      - docker container rm moodle-scraper-dev || true
-      - docker-compose -f /drone/src/docker-compose.yml -f /drone/src/docker-compose.prod.yml up --detach --build
+      - /bin/sh /drone/src/docker/scripts/deploy.sh
 
-  - name: slack after deploy
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
+
+---
+kind: pipeline
+type: docker
+name: notification after
+
+trigger:
+  event: [ push, pull_request ]
+
+steps:
+  - name: slack after
     image: plugins/slack
     failure: ignore
     settings:
@@ -142,17 +127,16 @@ steps:
       template: >
         {{repo.name}}:
         {{#success build.status}}
-        deploy #{{build.number}} succeeded!
+        build #{{build.number}} succeeded
         {{else}}
-        deploy #{{build.number}} failed!
+        build #{{build.number}} failed
         {{/success}}
       webhook:
         from_secret: SLACK_WEBHOOK_URL
     when:
       status: [ success, failure ]
 
-volumes:
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
-
+depends_on:
+  - build and publish docker image
+  - security
+  - deploy

@@ -1,12 +1,31 @@
 version: "3.8"
 
 services:
-  moodle-scraper:
+  scraper:
     container_name: moodle-scraper
+    image: gordonpn/moodle-scraper:latest
+    restart: unless-stopped
     command: ["python", "./main.py", "--automated", "--convert"]
     volumes:
       - ${MOODLE_DIRECTORY}:/home/appuser/courses
-    restart: unless-stopped
     environment:
       - GID=1000
       - UID=1000
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.labels.main-node == true
