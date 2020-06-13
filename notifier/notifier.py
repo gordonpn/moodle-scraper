@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 from typing import Dict
 
 import requests
@@ -15,9 +16,10 @@ class Notifier:
     def notify(self, msg: str) -> None:
         if "DEV_RUN" in os.environ:
             return
-        wrapped_msg: str = f"moodle-scraper project:\n{msg}"
+        wrapped_msg: str = f"moodle-scraper:\n{msg}"
         slack_data: Dict[str, str] = {"text": wrapped_msg}
 
+        time.sleep(5)
         response = requests.post(
             url=self.hook,
             data=json.dumps(slack_data),

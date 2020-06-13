@@ -1,3 +1,4 @@
+import concurrent.futures
 import logging
 import os
 import pathlib
@@ -11,6 +12,7 @@ from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 
 from configuration.config import Config
+from notifier.notifier import Notifier
 
 logger = logging.getLogger("moodle_scraper")
 
@@ -224,6 +226,7 @@ class Downloader:
             logger.info(f"Wrote info for {course} successfully")
 
     def save_files(self) -> None:
+        notifier = Notifier()
         for course, links in self.files.items():
             current_path: str = f"{self.save_path}/{course}"
             for name, link in links.items():
@@ -240,6 +243,8 @@ class Downloader:
                     )
                     self.threads_list.append(t)
                     t.start()
+                    msg: str = f"New file:\n{course}\n{name}"
+                    concurrent.futures.ThreadPoolExecutor().submit(notifier.notify, msg)
 
     def _parallel_save_files(self, current_path=None, name=None, link=None) -> None:
         params_are_valid: bool = current_path and name and link

@@ -91,11 +91,11 @@ def job():
 
 def run_schedule():
     logger.debug("Setting schedule")
-    schedule.every(6).hours.do(job)
+    schedule.every(1).hours.do(job)
 
     while True:
         schedule.run_pending()
-        time.sleep(1)
+        time.sleep(5 * 60)
 
 
 if __name__ == "__main__":
