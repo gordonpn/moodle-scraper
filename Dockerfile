@@ -1,20 +1,20 @@
 FROM python:3.8-alpine
 
 RUN adduser \
-  --disabled-password \
-  --home /home/appuser \
-  --shell /bin/bash \
-  --system \
-  --uid 1000 \
-  appuser
+    --disabled-password \
+    --home /home/appuser \
+    --shell /bin/bash \
+    --system \
+    --uid 1000 \
+    appuser
 
 RUN apk --no-cache add \
-  libreoffice \
-  libreoffice-base \
-  libreoffice-lang-en_us
+    libreoffice \
+    libreoffice-base \
+    libreoffice-lang-en_us
 
 RUN apk --no-cache add --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community \
-  openjdk11
+    openjdk11
 
 COPY requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt
