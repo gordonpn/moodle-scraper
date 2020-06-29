@@ -230,6 +230,7 @@ class Downloader:
         for course, links in self.files.items():
             current_path: str = f"{self.save_path}/{course}"
             for name, link in links.items():
+                name = name.replace("/", "")
                 if path.exists(f"{current_path}/{name}"):
                     logging.debug(f"{name} already exists, skipping download")
                 else:
