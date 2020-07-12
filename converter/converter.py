@@ -22,7 +22,7 @@ class PDFConverter:
 
     def convert_to_pdf(self) -> None:
         path_: str = self.directory
-        extensions: List[str] = [".ppt", ".docx", ".xls"]
+        extensions: List[str] = [".pptx", ".ppt", ".docx", ".xls"]
 
         if not path_:
             logger.debug(
