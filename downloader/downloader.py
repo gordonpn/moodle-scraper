@@ -152,7 +152,9 @@ class Downloader:
             file_type = activity.find("img")["src"]
             if "icon" not in file_type:
                 extension = ""
-                if "pdf" in file_type:
+                if "mpeg" in file_type:
+                    continue
+                elif "pdf" in file_type:
                     extension = ".pdf"
                 elif "powerpoint" in file_type:
                     extension = ".ppt"
