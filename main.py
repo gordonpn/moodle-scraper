@@ -100,7 +100,6 @@ def run_schedule():
 
 if __name__ == "__main__":
     args: argparse.Namespace = arguments_parser()
+    job()
     if args.automated:
         run_schedule()
-    else:
-        job()
