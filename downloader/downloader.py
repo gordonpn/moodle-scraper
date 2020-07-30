@@ -57,7 +57,7 @@ class Downloader:
         session_requests = requests.session()
         login_url: str = f"{self.moodle_url}login/index.php"
         try:
-            result = session_requests.get(login_url)
+            result = session_requests.get(login_url, verify=False)
         except Exception as e:
             logger.error(str(e))
             logger.error("Could not connect to Moodle, it could be down")
