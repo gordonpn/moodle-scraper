@@ -8,10 +8,13 @@ RUN adduser \
     --uid 1000 \
     appuser
 
-RUN apk --no-cache add \
+RUN apk update && apk --no-cache add \
+    ca-certificates \
     libreoffice \
     libreoffice-base \
     libreoffice-lang-en_us
+
+RUN update-ca-certificates
 
 RUN apk --no-cache add --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community \
     openjdk11
