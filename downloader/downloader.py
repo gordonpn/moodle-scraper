@@ -14,6 +14,9 @@ from requests.adapters import HTTPAdapter
 from configuration.config import Config
 from notifier.notifier import Notifier
 
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logger = logging.getLogger("moodle_scraper")
 
 
@@ -79,7 +82,7 @@ class Downloader:
         logger.info(f"Status code: {result.status_code}")
 
         url: str = f"{self.moodle_url}my/"
-        result = session_requests.get(url, headers=dict(referer=url))
+        result = session_requests.get(url, headers=dict(referer=url), verify=False)
         soup = BeautifulSoup(result.text, "html.parser")
 
         if soup.title.string == "Dashboard":
@@ -92,13 +95,12 @@ class Downloader:
 
     def get_courses(self) -> Dict[str, str]:
         courses_dict: Dict[str, str] = {}
-        url: str = f"{self.moodle_url}my/"
-        result = self.session.get(url, headers=dict(referer=url))
+        url: str = f"{self.moodle_url}/"
+        result = self.session.get(url, headers=dict(referer=url), verify=False)
         soup = BeautifulSoup(result.text, "html.parser")
-        for header in soup.find_all("h4", {"class": "media-heading"}):
-            course_name: str = header.find("a").string.strip()
-            course_moodle: str = header.find("a").get("href")
-            courses_dict[course_name] = course_moodle
+        course_sidebar = soup.select("#inst164409 > div > div > ul")
+        for header in course_sidebar[0].find_all("li"):
+            courses_dict[header.find("a").get("title")] = header.find("a").get("href")
 
         if self.config.excluded_courses:
             for course in courses_dict.copy():
@@ -123,7 +125,9 @@ class Downloader:
         logger.info("Going through each course Moodle page")
         for course, link in self.courses.items():
             logger.info(f"Course name: {course}, link: {link}")
-            course_page = self.session.get(link, headers=dict(referer=link))
+            course_page = self.session.get(
+                link, headers=dict(referer=link), verify=False
+            )
             soup = BeautifulSoup(course_page.text, "html.parser")
 
             text_list: List[str] = []
@@ -255,7 +259,9 @@ class Downloader:
         if params_are_valid:
             logger.info(f"Attempting parallel download of {name}")
             try:
-                request = self.session.get(link, headers=dict(referer=link))
+                request = self.session.get(
+                    link, headers=dict(referer=link), verify=False
+                )
                 with open(f"{current_path}/{name}", "wb") as write_file:
                     write_file.write(request.content)
             except Exception as e:
