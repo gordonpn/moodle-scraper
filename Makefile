@@ -7,3 +7,7 @@ dev:
 
 clean:
 	rm -rf ./courses
+	find . -name "*.pyc" -exec rm -rf {} \;
+
+format:
+	black -t py38 ./
