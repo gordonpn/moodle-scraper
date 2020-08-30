@@ -62,7 +62,6 @@ class Timer(ContextDecorator):
     def __enter__(self):
         msg: str = "Started job"
         logger.debug(msg)
-        HealthCheck.ping_status(Status.START)
         self.start_time = time.time()
         return self
 
@@ -70,13 +69,13 @@ class Timer(ContextDecorator):
         end_time = time.time()
         run_time = end_time - self.start_time
         msg: str = f"Job completed. Total run time: {int(run_time)} seconds"
-        HealthCheck.ping_status(Status.SUCCESS)
         logger.debug(msg)
 
 
 @Timer()
 def job():
     try:
+        HealthCheck.ping_status(Status.START)
         downloader = Downloader(args.username, args.password, args.directory)
         downloader.run()
 
@@ -84,6 +83,7 @@ def job():
             converter = PDFConverter(args.directory)
             converter.run()
 
+        HealthCheck.ping_status(Status.SUCCESS)
     except Exception:
         HealthCheck.ping_status(Status.FAIL)
         raise Exception
