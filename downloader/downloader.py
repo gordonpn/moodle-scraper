@@ -2,19 +2,19 @@ import concurrent.futures
 import logging
 import os
 import pathlib
+import re
 import sys
 from os import path
 from threading import Thread
 from typing import Dict, List
 
 import requests
+import urllib3
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 
 from configuration.config import Config
 from notifier.notifier import Notifier
-
-import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logger = logging.getLogger("moodle_scraper")
@@ -95,12 +95,21 @@ class Downloader:
 
     def get_courses(self) -> Dict[str, str]:
         courses_dict: Dict[str, str] = {}
-        url: str = f"{self.moodle_url}/"
+        url: str = f"{self.moodle_url}"
         result = self.session.get(url, headers=dict(referer=url), verify=False)
         soup = BeautifulSoup(result.text, "html.parser")
-        course_sidebar = soup.select("#inst164409 > div > div > ul")
+        course_sidebar = soup.select("#nav-drawer > nav > ul")
+
         for header in course_sidebar[0].find_all("li"):
-            courses_dict[header.find("a").get("title")] = header.find("a").get("href")
+            header_link = header.find("a")
+            if header_link:
+                course_name = header_link.select("div > div > span.media-body")[
+                    0
+                ].get_text(strip=True)
+
+                if re.search(r"[A-Z]{4}-[\d]{3}.*", course_name):
+                    course_link = header_link.get("href")
+                    courses_dict[course_name] = course_link
 
         if self.config.excluded_courses:
             for course in courses_dict.copy():
@@ -180,31 +189,31 @@ class Downloader:
         return files_dict
 
     def create_saving_directory(self) -> None:
-        path: str = self.directory
+        this_path: str = self.directory
 
         if not self.directory:
             logger.debug(
                 "Saving directory not specified, using current working directory"
             )
-            path = f"{os.getcwd()}/courses"
-            logger.debug(path)
+            this_path = f"{os.getcwd()}/courses"
+            logger.debug(this_path)
 
         course_paths: List[str] = []
 
-        if not os.path.exists(path):
+        if not os.path.exists(this_path):
             try:
-                pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+                pathlib.Path(this_path).mkdir(parents=True, exist_ok=True)
             except OSError as e:
                 logger.error(str(e))
-                logger.error(f"Creation of the directory {path} failed")
+                logger.error(f"Creation of the directory {this_path} failed")
                 raise OSError
             else:
-                logger.info(f"Successfully created the directory {path} ")
+                logger.info(f"Successfully created the directory {this_path} ")
         else:
-            logger.info(f"{path} exists and will be used to save files")
+            logger.info(f"{this_path} exists and will be used to save files")
 
         for course in self.files.keys():
-            course_path = f"{path}/{course}"
+            course_path = f"{this_path}/{course}"
             course_paths.append(course_path)
             if not os.path.exists(course_path):
                 try:
@@ -218,7 +227,7 @@ class Downloader:
             else:
                 logger.info(f"{course_path} exists and will be used to save files")
 
-        self.save_path = path
+        self.save_path = this_path
         self.course_paths_list = course_paths
 
     def save_text(self) -> None:
