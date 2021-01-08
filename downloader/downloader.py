@@ -12,6 +12,7 @@ import requests
 import urllib3
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
+from selenium import webdriver
 
 from configuration.config import Config
 from notifier.notifier import Notifier
@@ -57,39 +58,32 @@ class Downloader:
                 "command line "
             )
 
-        session_requests = requests.session()
-        login_url: str = f"{self.moodle_url}login/index.php"
-        try:
-            result = session_requests.get(login_url, verify=False)
-        except Exception as e:
-            logger.error(str(e))
-            logger.error("Could not connect to Moodle, it could be down")
-            raise ConnectionError
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_prefs = {"profile.default_content_settings": {"images": 2}}
+        chrome_options.experimental_options["prefs"] = chrome_prefs
 
-        soup = BeautifulSoup(result.text, "html.parser")
-        authenticity_token = soup.find("input", {"name": "logintoken"})["value"]
-
-        auth_data: Dict[str, str] = {
-            "logintoken": authenticity_token,
-            "username": self.username,
-            "password": self.password,
-        }
-
-        logger.info("Attempting to authenticate...")
-        result = session_requests.post(
-            login_url, data=auth_data, headers=dict(referer=login_url)
+        driver = webdriver.Chrome(chrome_options=chrome_options)
+        driver.get(f"{self.moodle_url}login/index.php")
+        log_in_button = driver.find_element_by_css_selector(
+            "#region-main > div > div.row.justify-content-center > div > div > div > div > div > div:nth-child(2) > div.potentialidplist.mt-3 > div > a"
         )
-        logger.info(f"Status code: {result.status_code}")
+        driver.execute_script("arguments[0].click();", log_in_button)
+        driver.find_element_by_css_selector("#userNameInput").send_keys(self.username)
+        driver.find_element_by_css_selector("#passwordInput").send_keys(self.password)
+        driver.execute_script(
+            "arguments[0].click();",
+            driver.find_element_by_css_selector("#submitButton"),
+        )
 
-        url: str = f"{self.moodle_url}my/"
-        result = session_requests.get(url, headers=dict(referer=url), verify=False)
-        soup = BeautifulSoup(result.text, "html.parser")
+        session_requests = requests.session()
+        cookies = driver.get_cookies()
+        for cookie in cookies:
+            session_requests.cookies.set(cookie["name"], cookie["value"])
 
-        if soup.title.string == "Dashboard":
-            logger.info("Authentication successful")
-        else:
-            logger.info("Authentication unsuccessful, exiting...")
-            raise ConnectionRefusedError
+        driver.close()
 
         return session_requests
 

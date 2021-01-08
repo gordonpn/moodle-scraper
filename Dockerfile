@@ -10,6 +10,8 @@ RUN adduser \
 
 RUN apk update && apk --no-cache add \
     ca-certificates \
+    chromium \
+    chromium-chromedriver \
     libreoffice \
     libreoffice-base \
     libreoffice-lang-en_us
@@ -32,5 +34,8 @@ USER appuser
 COPY . .
 
 VOLUME ["/home/appuser/courses"]
+
+ENV DISPLAY=:99
+ENV PATH="/usr/bin/chromedriver:${PATH}"
 
 CMD ["python", "./main.py"]
