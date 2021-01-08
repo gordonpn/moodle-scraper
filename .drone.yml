@@ -13,47 +13,14 @@ steps:
     settings:
       channel: drone-ci
       template: >
-        {{build.event}} on branch {{build.branch}} from repo {{repo.name}}
+        {{ uppercasefirst build.event }} on branch {{ build.branch }} from repo {{repo.name}}
 
-        build #{{build.number}} started
+        Build #{{build.number}} started
 
-        {{build.link}}
+        <{{ build.link }}|Visit build page ➡️>
       webhook:
         from_secret: SLACK_WEBHOOK_URL
 
----
-kind: pipeline
-type: docker
-name: build and publish docker image
-
-platform:
-  os: linux
-  arch: amd64
-
-trigger:
-  event: [ push, pull_request ]
-  branch:
-    exclude:
-      - master
-
-steps:
-  - name: publish
-    image: docker
-    environment:
-      DOCKER_TOKEN:
-        from_secret: DOCKER_TOKEN
-    volumes:
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      - echo $DOCKER_TOKEN | docker login -u gordonpn --password-stdin
-      - docker build -t gordonpn/moodle-scraper:latest .
-      - docker push gordonpn/moodle-scraper:latest
-
-volumes:
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
 ---
 kind: pipeline
 type: docker

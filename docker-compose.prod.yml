@@ -3,9 +3,9 @@ version: "3.8"
 services:
   scraper:
     container_name: moodle-scraper
-    image: gordonpn/moodle-scraper:latest
+    image: ghcr.io/gordonpn/moodle-scraper:stable
     restart: unless-stopped
-    command: ["python", "./main.py", "--automated", "--convert"]
+    command: [ "python", "./main.py", "--automated" ]
     volumes:
       - ${MOODLE_DIRECTORY}:/home/appuser/courses
     environment:
