@@ -5,7 +5,9 @@ import pathlib
 import re
 import sys
 from os import path
+from random import randint
 from threading import Thread
+from time import sleep
 from typing import Dict, List
 
 import requests
@@ -269,7 +271,11 @@ class Downloader:
         params_are_valid: bool = current_path and name and link
 
         if params_are_valid:
-            logger.info(f"Attempting parallel download of {name}")
+            sleep_time = randint(10, 120)
+            logger.info(
+                f"Waiting {sleep_time} seconds before parallel download of {name}"
+            )
+            sleep(sleep_time)
             try:
                 request = self.session.get(
                     link, headers=dict(referer=link), verify=False
