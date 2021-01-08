@@ -13,6 +13,9 @@ import urllib3
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.wait import WebDriverWait
 
 from configuration.config import Config
 from notifier.notifier import Notifier
@@ -67,8 +70,14 @@ class Downloader:
 
         driver = webdriver.Chrome(chrome_options=chrome_options)
         driver.get(f"{self.moodle_url}login/index.php")
-        log_in_button = driver.find_element_by_css_selector(
-            "#region-main > div > div.row.justify-content-center > div > div > div > div > div > div:nth-child(2) > div.potentialidplist.mt-3 > div > a"
+        wait = WebDriverWait(driver, 10)
+        log_in_button = wait.until(
+            expected_conditions.presence_of_element_located(
+                (
+                    By.CSS_SELECTOR,
+                    "#region-main > div > div.row.justify-content-center > div > div > div > div > div > div:nth-child(2) > div.potentialidplist.mt-3 > div > a",
+                )
+            )
         )
         driver.execute_script("arguments[0].click();", log_in_button)
         driver.find_element_by_css_selector("#userNameInput").send_keys(self.username)
