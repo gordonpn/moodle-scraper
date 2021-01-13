@@ -4,7 +4,7 @@ type: docker
 name: notification
 
 trigger:
-  event: [ push, pull_request ]
+  event: [push, pull_request]
 
 steps:
   - name: slack before
@@ -15,7 +15,7 @@ steps:
       template: >
         {{ uppercasefirst build.event }} on branch {{ build.branch }} from repo {{repo.name}}
 
-        Build #{{build.number}} started
+        Request to deploy build #{{build.number}}
 
         <{{ build.link }}|Visit build page ➡️>
       webhook:
@@ -27,7 +27,7 @@ type: docker
 name: security
 
 trigger:
-  event: [ push, pull_request ]
+  event: [push, pull_request]
   branch:
     exclude:
       - master

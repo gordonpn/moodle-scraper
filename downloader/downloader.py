@@ -191,6 +191,13 @@ class Downloader:
                 logger.info(f"With file link: {file_link}")
                 files_dict[file_name] = file_link
 
+        for file_in_sub_folder in soup.find_all("span", {"class": "fp-filename-icon"}):
+            file_link = file_in_sub_folder.find("a").get("href")
+            file_name = file_in_sub_folder.find("span", {"class": "fp-filename"}).text
+            logger.info(f"Found file: {file_name}")
+            logger.info(f"With file link: {file_link}")
+            files_dict[file_name] = file_link
+
         return files_dict
 
     def create_saving_directory(self) -> None:
