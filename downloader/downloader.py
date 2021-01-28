@@ -13,14 +13,14 @@ from typing import Dict, List
 import requests
 import urllib3
 from bs4 import BeautifulSoup
+from configuration.config import Config
+from jinja2 import Environment, FileSystemLoader
+from notifier.notifier import Notifier
 from requests.adapters import HTTPAdapter
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
-
-from configuration.config import Config
-from notifier.notifier import Notifier
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logger = logging.getLogger("moodle_scraper")
@@ -168,28 +168,16 @@ class Downloader:
 
         for activity in soup.find_all("div", {"class": "activityinstance"}):
             file_type = activity.find("img")["src"]
-            if "icon" not in file_type:
-                extension = ""
-                if "mpeg" in file_type:
-                    continue
-                elif "pdf" in file_type:
-                    extension = ".pdf"
-                elif "powerpoint" in file_type:
-                    extension = ".ppt"
-                elif "archive" in file_type:
-                    extension = ".zip"
-                elif "text" in file_type:
-                    extension = ".txt"
-                elif "spreadsheet" in file_type:
-                    extension = ".xls"
-                elif "document" in file_type:
-                    extension = ".docx"
-                file_name = activity.find("span", {"class": "instancename"}).text
-                file_name = file_name.replace(" File", "").strip() + extension
-                logger.info(f"Found file: {file_name}")
-                file_link = activity.find("a").get("href")
-                logger.info(f"With file link: {file_link}")
-                files_dict[file_name] = file_link
+            extension = self._get_extension(file_type)
+            if extension is None:
+                continue
+
+            file_name = activity.find("span", {"class": "instancename"}).text
+            file_name = file_name.replace(" File", "").strip() + extension
+            logger.info(f"Found file: {file_name}")
+            file_link = activity.find("a").get("href")
+            logger.info(f"With file link: {file_link}")
+            files_dict[file_name] = file_link
 
         for file_in_sub_folder in soup.find_all("span", {"class": "fp-filename-icon"}):
             file_link = file_in_sub_folder.find("a").get("href")
@@ -199,6 +187,29 @@ class Downloader:
             files_dict[file_name] = file_link
 
         return files_dict
+
+    def _get_extension(self, file_type):
+        if "icon" not in file_type:
+            if "mpeg" in file_type:
+                return None
+            elif "pdf" in file_type:
+                return ".pdf"
+            elif "powerpoint" in file_type:
+                return ".pptx"
+            elif "archive" in file_type:
+                return ".zip"
+            elif "text" in file_type:
+                return ".txt"
+            elif "spreadsheet" in file_type:
+                return ".xlsx"
+            elif "document" in file_type:
+                return ".docx"
+        else:
+            if "quiz" in file_type or "assign" in file_type:
+                return ".html"
+
+    def _get_nested_files(self):
+        pass
 
     def create_saving_directory(self) -> None:
         this_path: str = self.directory
@@ -284,11 +295,18 @@ class Downloader:
             )
             sleep(sleep_time)
             try:
-                request = self.session.get(
-                    link, headers=dict(referer=link), verify=False
-                )
-                with open(f"{current_path}/{name}", "wb") as write_file:
-                    write_file.write(request.content)
+                if ".html" in name:
+                    env = Environment(loader=FileSystemLoader("assets"))
+                    template = env.get_template("link_template.html")
+                    output = template.render(url_name=name, url=link)
+                    with open(f"{current_path}/{name}", "w") as write_file:
+                        write_file.write(output)
+                else:
+                    request = self.session.get(
+                        link, headers=dict(referer=link), verify=False
+                    )
+                    with open(f"{current_path}/{name}", "wb") as write_file:
+                        write_file.write(request.content)
             except Exception as e:
                 logger.error(f"File with same name is open | {str(e)}")
         else:

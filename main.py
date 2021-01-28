@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import time
 from contextlib import ContextDecorator
 from logging.config import fileConfig
@@ -84,6 +85,9 @@ def job():
             converter.run()
 
         HealthCheck.ping_status(Status.SUCCESS)
+        if "DEV_RUN" in os.environ:
+            while 1:
+                time.sleep(0.1)
     except Exception:
         HealthCheck.ping_status(Status.FAIL)
         raise Exception
