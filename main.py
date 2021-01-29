@@ -3,6 +3,7 @@ import logging
 import os
 import time
 from contextlib import ContextDecorator
+from logging.config import fileConfig
 
 import schedule
 
