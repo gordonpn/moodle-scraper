@@ -31,7 +31,7 @@ class PDFConverter:
             path_ = f"{os.getcwd()}/courses"
             logger.debug(path_)
 
-        for root, dirs, files in os.walk(path_):
+        for root, _, files in os.walk(path_):
             for file_ in files:
                 if file_.endswith(tuple(extensions)):
                     logger.debug(f"Found {file_}")

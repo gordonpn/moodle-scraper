@@ -118,11 +118,7 @@ class Downloader:
                     course_link = header_link.get("href")
                     courses_dict[course_name] = course_link
 
-        if self.config.excluded_courses:
-            for course in courses_dict.copy():
-                for exclusion in self.config.excluded_courses:
-                    if exclusion in course.lower():
-                        courses_dict.pop(course)
+        self._check_exclusions(courses_dict)
 
         if not bool(courses_dict):
             logger.error("Could not find any courses, exiting...")
@@ -133,6 +129,13 @@ class Downloader:
                 logger.info(course)
 
         return courses_dict
+
+    def _check_exclusions(self, courses_dict):
+        if self.config.excluded_courses:
+            for course in courses_dict.copy():
+                for exclusion in self.config.excluded_courses:
+                    if exclusion in course.lower():
+                        courses_dict.pop(course)
 
     def get_files(self) -> None:
         num_of_files: int = 0
