@@ -24,6 +24,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logger = logging.getLogger("moodle_scraper")
+HTML_EXT = ".html"
+HTML_PARSER = "html.parser"
 
 
 class Downloader:
@@ -102,7 +104,7 @@ class Downloader:
         courses_dict: Dict[str, str] = {}
         url: str = f"{self.moodle_url}"
         result = self.session.get(url, headers=dict(referer=url), verify=False)
-        soup = BeautifulSoup(result.text, "html.parser")
+        soup = BeautifulSoup(result.text, HTML_PARSER)
         course_sidebar = soup.select("#nav-drawer > nav > ul")
 
         for header in course_sidebar[0].find_all("li"):
@@ -142,7 +144,7 @@ class Downloader:
             course_page = self.session.get(
                 link, headers=dict(referer=link), verify=False
             )
-            soup = BeautifulSoup(course_page.text, "html.parser")
+            soup = BeautifulSoup(course_page.text, HTML_PARSER)
 
             text_list: List[str] = []
             for text in soup.find_all("div", {"class": "no-overflow"}):
@@ -169,15 +171,19 @@ class Downloader:
         for activity in soup.find_all("div", {"class": "activityinstance"}):
             file_type = activity.find("img")["src"]
             extension = self._get_extension(file_type)
-            if extension is None:
+            if not extension:
                 continue
 
             file_name = activity.find("span", {"class": "instancename"}).text
             file_name = file_name.replace(" File", "").strip() + extension
-            logger.info(f"Found file: {file_name}")
             file_link = activity.find("a").get("href")
+            logger.info(f"Found file: {file_name}")
             logger.info(f"With file link: {file_link}")
             files_dict[file_name] = file_link
+
+            if HTML_EXT in extension:
+                nested_files_dict = self._get_nested_files(file_link)
+                files_dict = {**files_dict, **nested_files_dict}
 
         for file_in_sub_folder in soup.find_all("span", {"class": "fp-filename-icon"}):
             file_link = file_in_sub_folder.find("a").get("href")
@@ -188,10 +194,10 @@ class Downloader:
 
         return files_dict
 
-    def _get_extension(self, file_type):
+    def _get_extension(self, file_type) -> str:
         if "icon" not in file_type:
             if "mpeg" in file_type:
-                return None
+                return ""
             elif "pdf" in file_type:
                 return ".pdf"
             elif "powerpoint" in file_type:
@@ -206,10 +212,21 @@ class Downloader:
                 return ".docx"
         else:
             if "quiz" in file_type or "assign" in file_type:
-                return ".html"
+                return HTML_EXT
 
-    def _get_nested_files(self):
-        pass
+    def _get_nested_files(self, link) -> Dict[str, str]:
+        result = self.session.get(link, headers=dict(referer=link), verify=False)
+        soup = BeautifulSoup(result.text, HTML_PARSER)
+        files_dict = {}
+        for nested_file in soup.find_all("div", {"class": "fileuploadsubmission"}):
+            a_tag = nested_file.find("a", {"target": "_blank"})
+            file_link = a_tag.get("href")
+            file_name = a_tag.text
+            logger.info(f"Found file: {file_name}")
+            logger.info(f"With file link: {file_link}")
+            files_dict[file_name] = file_link
+
+        return files_dict
 
     def create_saving_directory(self) -> None:
         this_path: str = self.directory
@@ -295,7 +312,7 @@ class Downloader:
             )
             sleep(sleep_time)
             try:
-                if ".html" in name:
+                if HTML_EXT in name:
                     env = Environment(loader=FileSystemLoader("assets"))
                     template = env.get_template("link_template.html")
                     output = template.render(url_name=name, url=link)
