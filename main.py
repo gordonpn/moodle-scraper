@@ -12,7 +12,7 @@ from downloader.downloader import Downloader
 from healthcheck.healthcheck import HealthCheck, Status
 from notifier.notifier import Notifier
 
-logging.config.fileConfig("logging.ini", disable_existing_loggers=False)
+fileConfig("logging.ini", disable_existing_loggers=False)
 logger = logging.getLogger("moodle_scraper")
 notifier: Notifier = Notifier()
 

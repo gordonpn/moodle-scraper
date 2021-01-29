@@ -28,6 +28,6 @@ class Notifier:
 
         logger_msg = "Message sent to slack notifier webhook"
         if response.ok:
-            logger.debug(f"{logger_msg} successful")
+            logger.debug("%s successful", logger_msg)
         else:
-            logger.debug(f"{logger_msg} not successful")
+            logger.debug("%s not successful", logger_msg)

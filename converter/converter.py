@@ -34,12 +34,12 @@ class PDFConverter:
         for root, _, files in os.walk(path_):
             for file_ in files:
                 if file_.endswith(tuple(extensions)):
-                    logger.debug(f"Found {file_}")
+                    logger.debug("Found %s", file_)
                     filename: str = f"{file_[: file_.rfind('.')]}.pdf"
                     if path.exists(f"{root}/{filename}"):
-                        logger.debug(f"{filename} already exists, skipping conversion")
+                        logger.debug("%s already exists, skipping conversion", filename)
                     else:
-                        logger.debug(f"{filename} does not exist, will convert.")
+                        logger.debug("%s does not exist, will convert.", filename)
                         t = Thread(
                             target=self._conversion_job,
                             kwargs={"file_to_convert": file_, "root": root},
@@ -60,11 +60,11 @@ class PDFConverter:
 
     def join_threads(self) -> None:
         for thread in self.threads:
-            logger.debug(f"Joining conversion threads: {thread.getName()}")
+            logger.debug("Joining conversion threads: %s", thread.getName())
             thread.join()
 
     def kill_processes(self) -> None:
         logger.debug("Cleaning up processes")
         for process in self.processes_to_kill:
-            logger.debug(f"Killing {process.pid=}")
+            logger.debug("Killing %s", process.pid)
             process.kill()
