@@ -43,13 +43,13 @@ trigger:
 steps:
   - name: bandit test
     failure: ignore
-    image: python:3.8-buster
+    image: python:3.9-buster
     commands:
       - pip install bandit
       - bandit -r ./ -ll
   - name: safety check
     failure: ignore
-    image: python:3.8-buster
+    image: python:3.9-buster
     commands:
       - pip install safety
       - safety check
@@ -72,7 +72,7 @@ trigger:
 
 steps:
   - name: deploy prod
-    image: docker/compose:1.25.5
+    image: linuxserver/docker-compose:version-1.29.2
     environment:
       MOODLE_PASSWORD:
         from_secret: MOODLE_PASSWORD
