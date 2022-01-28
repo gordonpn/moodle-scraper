@@ -70,6 +70,9 @@ trigger:
   target:
     - production
 
+node:
+  swarm-role: manager
+
 steps:
   - name: deploy prod
     image: linuxserver/docker-compose:version-1.29.2
@@ -91,6 +94,10 @@ steps:
       - /bin/sh /drone/src/docker/scripts/deploy.sh
   - name: slack notification
     image: plugins/slack:linux-arm64
+    when:
+      status:
+        - failure
+        - success
     failure: ignore
     settings:
       channel: drone-ci
