@@ -8,7 +8,7 @@ trigger:
 
 steps:
   - name: slack before
-    image: plugins/slack
+    image: plugins/slack:linux-arm64
     failure: ignore
     settings:
       channel: drone-ci
@@ -78,7 +78,7 @@ steps:
     commands:
       - /bin/sh /drone/src/docker/scripts/deploy.sh
   - name: slack notification
-    image: plugins/slack
+    image: plugins/slack:linux-arm64
     failure: ignore
     settings:
       channel: drone-ci
