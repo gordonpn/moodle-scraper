@@ -3,12 +3,16 @@ kind: pipeline
 type: docker
 name: notification
 
+platform:
+  os: linux
+  arch: arm64
+
 trigger:
   event: [push, pull_request]
 
 steps:
   - name: slack before
-    image: plugins/slack
+    image: plugins/slack:linux-arm64
     failure: ignore
     settings:
       channel: drone-ci
@@ -25,6 +29,10 @@ steps:
 kind: pipeline
 type: docker
 name: security
+
+platform:
+  os: linux
+  arch: arm64
 
 trigger:
   event: [push, pull_request]
@@ -52,6 +60,10 @@ kind: pipeline
 type: docker
 name: deploy
 
+platform:
+  os: linux
+  arch: arm64
+
 trigger:
   event:
     - promote
@@ -78,7 +90,7 @@ steps:
     commands:
       - /bin/sh /drone/src/docker/scripts/deploy.sh
   - name: slack notification
-    image: plugins/slack
+    image: plugins/slack:linux-arm64
     failure: ignore
     settings:
       channel: drone-ci
