@@ -10,5 +10,4 @@ services:
       - HC_UUID
       - MOODLE_PASSWORD
       - MOODLE_USERNAME
-      - TZ=America/Montreal
       - SLACK_NOTIFIER_HOOK

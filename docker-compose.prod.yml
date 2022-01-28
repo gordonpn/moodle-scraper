@@ -4,18 +4,19 @@ services:
   scraper:
     container_name: moodle-scraper
     image: ghcr.io/gordonpn/moodle-scraper:stable
+    user: 1001:1001
     restart: unless-stopped
     command: [ "python", "./main.py", "--automated" ]
     volumes:
-      - ${MOODLE_DIRECTORY}:/home/appuser/courses
+      - /mnt/glusterfs/syncthing/moodle:/home/appuser/courses
     environment:
-      - GID=1000
-      - UID=1000
+      - GID=1001
+      - UID=1001
     deploy:
       replicas: 1
       update_config:
         parallelism: 1
-        order: start-first
+        order: stop-first
         failure_action: rollback
         delay: 10s
       rollback_config:
@@ -28,4 +29,4 @@ services:
         window: 120s
       placement:
         constraints:
-          - node.labels.main-node == true
+          - node.labels.persistence == true
