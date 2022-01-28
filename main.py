@@ -88,9 +88,9 @@ def job():
         if "DEV_RUN" in os.environ:
             while 1:
                 time.sleep(0.1)
-    except Exception:
-        HealthCheck.ping_status(Status.FAIL)
-        raise Exception
+    except Exception as ex:
+        HealthCheck.ping_status(Status.FAIL, ex)
+        raise
 
 
 def run_schedule():

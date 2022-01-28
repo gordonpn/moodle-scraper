@@ -62,7 +62,8 @@ class Downloader:
     def get_session(self) -> requests.Session:
         if not (self.username and self.password):
             raise ValueError(
-                "Username and password must be specified in environment variables or passed as arguments on the "
+                "Username and password must be specified in "
+                "environment variables or passed as arguments on the "
                 "command line "
             )
 
@@ -220,9 +221,8 @@ class Downloader:
                 extension = ".xlsx"
             elif "document" in file_type:
                 extension = ".docx"
-        else:
-            if "quiz" in file_type or "assign" in file_type:
-                extension = HTML_EXT
+        elif "quiz" in file_type or "assign" in file_type:
+            extension = HTML_EXT
         return extension
 
     def _get_nested_files(self, link) -> Dict[str, str]:
