@@ -364,3 +364,4 @@ Temporary Items
 .idea/pylint.xml
 /courses/
 moodle-scraper.conf
+.vscode/settings.json
