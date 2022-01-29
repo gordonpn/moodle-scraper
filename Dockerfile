@@ -10,8 +10,8 @@ RUN adduser \
 
 RUN apk update && apk --no-cache add \
     ca-certificates \
-    chromium \
-    chromium-chromedriver \
+    chromium=97.0.4692.99-r0 \
+    chromium-chromedriver=97.0.4692.99-r0 \
     libreoffice \
     libreoffice-base \
     libreoffice-lang-en_us
