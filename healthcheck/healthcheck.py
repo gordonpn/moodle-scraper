@@ -26,4 +26,4 @@ class HealthCheck:
         if not msg:
             requests.get(url)
         else:
-            requests.post(url=url, data=msg, headers={"Content-Type": "text/plain"})
+            requests.post(url=url, data=msg)
