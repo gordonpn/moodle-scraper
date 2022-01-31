@@ -89,7 +89,7 @@ def job():
             while 1:
                 time.sleep(0.1)
     except Exception as ex:
-        HealthCheck.ping_status(Status.FAIL, ex)
+        HealthCheck.ping_status(Status.FAIL, str(ex))
         raise
 
 

@@ -19,6 +19,7 @@ from notifier.notifier import Notifier
 from requests.adapters import HTTPAdapter
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -59,6 +60,33 @@ class Downloader:
         self.save_files()
         self.clean_up_threads()
 
+    def get_webdriver(self):
+        attempts_left: int = 5
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_prefs = {"profile.default_content_settings": {"images": 2}}
+        chrome_options.experimental_options["prefs"] = chrome_prefs
+        caps = DesiredCapabilities().CHROME
+        caps["pageLoadStrategy"] = "eager"
+
+        while attempts_left > 0:
+            try:
+                driver = webdriver.Chrome(
+                    chrome_options=chrome_options, desired_capabilities=caps
+                )
+            except Exception as e:
+                logger.info("Encountered error while creating Selenium driver: %s", e)
+                attempts_left -= 1
+                continue
+            break
+        else:
+            raise RuntimeError("Could not create Selenium driver after 5 tries")
+
+        return driver
+
     def get_session(self) -> requests.Session:
         if not (self.username and self.password):
             raise ValueError(
@@ -67,14 +95,7 @@ class Downloader:
                 "command line "
             )
 
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_prefs = {"profile.default_content_settings": {"images": 2}}
-        chrome_options.experimental_options["prefs"] = chrome_prefs
-
-        driver = webdriver.Chrome(chrome_options=chrome_options)
+        driver = self.get_webdriver()
         driver.get(f"{self.moodle_url}login/index.php")
         wait = WebDriverWait(driver, 10)
         log_in_button = wait.until(
@@ -115,8 +136,7 @@ class Downloader:
         course_sidebar = soup.select("#nav-drawer > nav > ul")
 
         for header in course_sidebar[0].find_all("li"):
-            header_link = header.find("a")
-            if header_link:
+            if header_link := header.find("a"):
                 course_name = header_link.select("div > div > span.media-body")[
                     0
                 ].get_text(strip=True)
